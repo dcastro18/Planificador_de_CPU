@@ -1,3 +1,0 @@
-/home/rev/Documents/GitHub/Planificador_de_CPU/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/home/rev/Documents/GitHub/Planificador_de_CPU/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/rev/Documents/GitHub/Planificador_de_CPU/cmake-build-debug/CMakeFiles/Planificador_de_CPU.dir
