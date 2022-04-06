@@ -123,7 +123,7 @@ void sjf(int n,int p[30], int bt[30]) {
     bt[]: Burst Time of Processes
     pr[]: Priority
 */
-void hpf(int n, int bt[30], pr[30]) {
+void hpf(int n, int bt[30], int pr[30]) {
     int i,j,t;
     // Waiting Time
     int wt[30];
@@ -133,8 +133,8 @@ void hpf(int n, int bt[30], pr[30]) {
 
     for (i = 0; i < n ; i++)
     {
-        pos=i;
-        for(j=i+1;j<v;j++)
+        int pos=i;
+        for(j=i+1;j<n;j++)
         {
             if(pr[j]<pr[pos])
             {
@@ -161,7 +161,7 @@ void hpf(int n, int bt[30], pr[30]) {
             wt[i]=wt[i]+bt[j];
         }
         tat[i]=wt[i]+bt[i];
-        printf("%d\t\t\t %d\t\t\t %d\t\t\t %d\n", i+1, bt[i], pr[i],wt[i], tat[i]);
+        printf("%d\t\t\t %d\t\t\t %d\t\t\t %d\t\t\t %d\n", i+1, bt[i], pr[i],wt[i], tat[i]);
     }
 
 }
