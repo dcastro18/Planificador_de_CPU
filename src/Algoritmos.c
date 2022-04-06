@@ -70,7 +70,7 @@ void roundRobin(int n, int qt, int bt[10]) {
     n: number of processes
     bt[]: Burst Time of Processes
     p[]: Process Number
-    max: 
+
 */
 void sjf(int n,int p[30], int bt[30]) {
     
@@ -126,8 +126,33 @@ int hpf() {
 
 
 // FIFO
+/*
+    n: number of processes
+    bt[]: Burst Time of Processes
+    p[]: Process Number
+   
+*/
+void fifo(int n, int bt[30]) {
+    
+    int i,j;
+    // Waiting Time
+    int wt[30];
+    // Turn Around Time
+    int tat[30];
 
-int fifo() {
-    printf("Hello, World!\n");
-    return 0;
+    printf("process\t burst time\t waiting time\t turn around time\n");
+    for( i = 0 ; i < n ; i++)
+    {
+        wt[i] = 0;
+
+        tat[i] = 0;
+
+        for (j=0 ; j < i ; j++)
+        {
+            wt[i] = wt[i]+bt[j];
+        }
+        tat[i] = wt[i]+bt[i];
+        printf("%d\t\t\t%d\t\t\t%d\t\t\t%d\n",i+1,bt[i],wt[i],tat[i]);
+    }
+
 }
