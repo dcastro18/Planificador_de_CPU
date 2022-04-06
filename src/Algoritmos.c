@@ -118,10 +118,52 @@ void sjf(int n,int p[30], int bt[30]) {
 
 
 // HPF
+/*
+    n: number of processes
+    bt[]: Burst Time of Processes
+    pr[]: Priority
+*/
+void hpf(int n, int bt[30], pr[30]) {
+    int i,j,t;
+    // Waiting Time
+    int wt[30];
+    // Turn Around Time
+    int tat[30];
 
-int hpf() {
-    printf("Hello, World!\n");
-    return 0;
+
+    for (i = 0; i < n ; i++)
+    {
+        pos=i;
+        for(j=i+1;j<v;j++)
+        {
+            if(pr[j]<pr[pos])
+            {
+                pos=j;
+            }
+        }
+        t=pr[i];
+        pr[i]=pr[pos];
+        pr[pos]=t;
+
+        t=bt[i];
+        bt[i]=bt[pos];
+        bt[pos]=t;
+    }
+    wt[0]=0;
+    printf("process \t burst time\t priority \t waiting time \t turn around time\n");
+
+    for (i=0 ; i < n; i++)
+    {
+        wt[i]=0;
+        tat[i]=0;
+        for (j=0;j<i;j++)
+        {
+            wt[i]=wt[i]+bt[j];
+        }
+        tat[i]=wt[i]+bt[i];
+        printf("%d\t\t\t %d\t\t\t %d\t\t\t %d\n", i+1, bt[i], pr[i],wt[i], tat[i]);
+    }
+
 }
 
 
@@ -129,7 +171,6 @@ int hpf() {
 /*
     n: number of processes
     bt[]: Burst Time of Processes
-    p[]: Process Number
    
 */
 void fifo(int n, int bt[30]) {
