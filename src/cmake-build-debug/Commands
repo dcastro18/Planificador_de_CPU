@@ -1,0 +1,6 @@
+Ruta
+/home/dcastro/Documentos/GitHub/Planificador_de_CPU/src
+
+Comandos
+gcc main.c -o ejecutable -l pthread
+./ejecutable

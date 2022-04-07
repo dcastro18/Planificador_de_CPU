@@ -200,29 +200,4 @@ void fifo(int n, int bt[30]) {
 
 
 
-void readFile() {
-    FILE *fp; // declaration of file pointer
-    
-    fp = fopen("prueba.txt","r"); // opening of file
-    if (!fp) // checking for error
-        return 1;
 
-    fseek(fp, 0 , SEEK_END);
-    long fileSize = ftell(fp);
-    fseek(fp, 0 , SEEK_SET);// needed for next read from beginning of file
-    printf("%ld\n",fileSize);
-    
-    // Number of lines in the file -1 is the amount of processes
-    int amountOfProcess = -1;
-    
-    char con[fileSize]; // variable to read the content
-
-    while (fgets(con,fileSize, fp)!=NULL) { // reading file content
-        //Espera dos segundos y y envia al server
-        printf("%s\n",con);
-        
-    }
-    
-    fclose(fp); // closing file
-    
-}
