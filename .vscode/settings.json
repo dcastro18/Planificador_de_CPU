@@ -2,6 +2,8 @@
     "C_Cpp.errorSquiggles": "Disabled",
     "files.associations": {
         "limits": "c",
-        "algorithm": "c"
+        "algorithm": "c",
+        "stat.h": "c",
+        "time.h": "c"
     }
 }
