@@ -5,11 +5,7 @@
 #include <string.h>
 #include <time.h>
 
-typedef struct dato {
-    int PID;
-    int burst;
-    int priority;
-} PCB;
+
 
 int randNumber(int min, int max) {
     time_t t;
@@ -22,6 +18,8 @@ void *sendData (void *args) {
     char *msg = (char *)args;
     printf("%s",msg);
     // enviar msg por el socket
+
+    // matar el thread
 }
 
 
@@ -63,36 +61,11 @@ void *readFile (void *args) {
     }
     fclose(fp); // closing file
 
-    // Hacer el random para dormir el hilo unos segundos antes de leer la siguiente linea
-    //printf("number is: %d\n", randNumber(3,8));
 
 }
 
 int main(int argc, char const *argv[])
 {
-
-/*
-    PCB pcb;
-    pcb.PID= 1;
-    pcb.burst = 4;
-    pcb.priority = 1;
-
-    PCB readyQueue[100];
-    int lenProcesses=1;
-
-    readyQueue[lenProcesses] = pcb;
-    //int lenReadyQueue = sizeof(readyQueue)/sizeof(readyQueue[0]);;
-
-*/
-
-    //int pBurst = readyQueue[lenProcesses].PID;
-
-    /*for (int i = PID_deleted; i < lenProcesses; ++i) {
-        readyQueue[i] = readyQueue[i+1];
-    }*/
-
-    //printf("%d\n",readyQueue[50].PID);
-
     int n, opcion;
 
     do
@@ -109,10 +82,11 @@ int main(int argc, char const *argv[])
 
         pthread_t mainThread;
 
+        // crear el socket
+
         switch ( opcion )
         {
             case 1:
-
                 pthread_create(&mainThread,NULL, readFile,NULL);
                 pthread_join(mainThread,NULL);
                 break;
