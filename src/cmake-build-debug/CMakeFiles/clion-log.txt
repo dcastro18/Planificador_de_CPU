@@ -1,0 +1,4 @@
+/snap/clion/184/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/snap/clion/184/bin/ninja/linux/ninja -G Ninja /home/dcastro/Documentos/GitHub/Planificador_de_CPU/src
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/dcastro/Documentos/GitHub/Planificador_de_CPU/src/cmake-build-debug

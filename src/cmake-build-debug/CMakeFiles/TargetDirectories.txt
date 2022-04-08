@@ -1,0 +1,3 @@
+/home/dcastro/Documentos/GitHub/Planificador_de_CPU/src/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/dcastro/Documentos/GitHub/Planificador_de_CPU/src/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/dcastro/Documentos/GitHub/Planificador_de_CPU/src/cmake-build-debug/CMakeFiles/src.dir

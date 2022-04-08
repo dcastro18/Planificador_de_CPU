@@ -1,0 +1,9 @@
+Ruta
+/home/dcastro/Documentos/GitHub/Planificador_de_CPU/src
+
+Comandos
+gcc cliente.c -o exeCliente -l pthread
+./exeCliente
+
+gcc servidor.c -o exeServidor -l pthread
+./exeServidor

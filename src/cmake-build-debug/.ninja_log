@@ -1,0 +1,8 @@
+# ninja log v5
+103	161	1649297078564455243	src	a9877bd8c0b215ee
+96	228	1649203560940813120	CMakeFiles/src.dir/Client/Manual.c.o	c5986fa077d3eaf7
+1	274	1649387909095660766	CMakeFiles/src.dir/cliente.c.o	f80509ca890d8d54
+0	291	1649387909111660731	CMakeFiles/src.dir/main.c.o	932616acd9b4a0a0
+5	101	1649388206555165135	build.ninja	4fdce90c13b74196
+160	250	1649203560968812663	CMakeFiles/src.dir/Loader/Loader.c.o	a318aa1197c0e5df
+0	89	1649203560808815274	CMakeFiles/src.dir/Client/AUtomatic.c.o	c0709b86f274d9
