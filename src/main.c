@@ -5,11 +5,16 @@
 #include <string.h>
 #include <time.h>
 
-typedef struct dato {
+
+// Cola
+typedef struct PCB {
     int PID;
     int burst;
     int priority;
 } PCB;
+
+// Variable global
+PCB readyQueue[100];
 
 int randNumber(int min, int max) {
     time_t t;
@@ -20,7 +25,7 @@ int randNumber(int min, int max) {
 
 void *sendData (void *args) {
     char *msg = (char *)args;
-    printf("%s",msg);
+    //printf("%s",msg);
     // enviar msg por el socket
 }
 
@@ -52,17 +57,31 @@ void *readFile (void *args) {
             pthread_t pthread;
             pthread_create(&pthread,NULL, sendData, (void *)&con);
             pthread_join(pthread,NULL);
-
+            
             // Recibo el PID y creo el hilo con ese ID (y con la info)
-            char PID[] = "1";
-            printf("El PID es %s\n",PID);
-            int randNum = randNumber(3,8);
-            sleep(randNum);
+            // Crea el PCB
+            PCB pcbTemp;
+            pcbTemp.PID = i;
+            pcbTemp.burst = con[0] - '0';
+            pcbTemp.priority = con[2]- '0';
+            
+            readyQueue[i] = pcbTemp;
+            // Crea numero random
+            //int randNum = randNumber(3,8);
+            //sleep(randNum);
+
+            
         }
         i++;
     }
     fclose(fp); // closing file
 
+    for (int j = 0 ; j < 10 ; j++){
+        
+        printf("PID %d \t", readyQueue[j].PID);
+        printf("Burst %d\t", readyQueue[j].burst);
+        printf("Priority %d\n", readyQueue[j].priority);
+    }
     // Hacer el random para dormir el hilo unos segundos antes de leer la siguiente linea
     //printf("number is: %d\n", randNumber(3,8));
 
@@ -71,28 +90,7 @@ void *readFile (void *args) {
 int main(int argc, char const *argv[])
 {
 
-/*
-    PCB pcb;
-    pcb.PID= 1;
-    pcb.burst = 4;
-    pcb.priority = 1;
-
-    PCB readyQueue[100];
-    int lenProcesses=1;
-
-    readyQueue[lenProcesses] = pcb;
-    //int lenReadyQueue = sizeof(readyQueue)/sizeof(readyQueue[0]);;
-
-*/
-
-    //int pBurst = readyQueue[lenProcesses].PID;
-
-    /*for (int i = PID_deleted; i < lenProcesses; ++i) {
-        readyQueue[i] = readyQueue[i+1];
-    }*/
-
-    //printf("%d\n",readyQueue[50].PID);
-
+    
     int n, opcion;
 
     do

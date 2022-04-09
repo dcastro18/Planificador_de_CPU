@@ -6,7 +6,7 @@
 #include <time.h>
 
 
-typedef struct dato {
+typedef struct PCB {
     int PID;
     int burst;
     int priority;
@@ -14,6 +14,7 @@ typedef struct dato {
 
 PCB readyQueue[100];
 PCB processHistory[100];
+int processCounter = 0;
 
 // crear 2 hilos distintos (Job y cpu scheduler)
 

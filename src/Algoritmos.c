@@ -7,6 +7,7 @@
     bt[]: Burst Time of Processes
 */
 void roundRobin(int n, int qt, int bt[10]) {
+    
     int i,temp;
     // Turn Around Time
     int tat[10];
@@ -175,6 +176,7 @@ void hpf(int n, int bt[30], int pr[30]) {
 */
 void fifo(int n, int bt[30]) {
     
+
     int i,j;
     // Waiting Time
     int wt[30];
