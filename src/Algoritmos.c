@@ -10,7 +10,31 @@ typedef struct PCB {
 
 // Variable global
 PCB readyQueue[100];
+// Calculo de promedios de WT
+float getPromedioWT(PCB queue[100]) { 
+    float promedio = 0.0;
+    float n = (float)getQueueSize(queue);
+    int temp = 0;
+    int j = getQueueSize(queue);
+    for (int i = 0; i < j ; i++){
+        temp = temp + queue[i].wt;
+    }
+    promedio = temp/n;
+    return  promedio;
+}
+// Calculo de promedios de TAT
 
+float getPromedioTAT(PCB queue[100]) { 
+    float promedio = 0.0;
+    float n = (float)getQueueSize(queue);
+    int temp = 0;
+    int j = getQueueSize(queue);
+    for (int i = 0; i < j ; i++){
+        temp = temp + queue[i].tat;
+    }
+    promedio = temp/n;
+    return  promedio;
+}
 // Auxiliar para obtener la cantidad de procesos en el Queue
 int getQueueSize(PCB queue[100]) {
     int i = 0;
@@ -116,7 +140,7 @@ void roundRobin(int n, int qt, int bt[10]) {
     p[]: Process Number
 
 */
-void sjf(PCB queue[100]) {
+void sjf(PCB readyQueue[100]) {
     // Cantidad de procesos
     int n =  getQueueSize(queue);
     int i,j;
@@ -169,7 +193,7 @@ void sjf(PCB queue[100]) {
     bt[]: Burst Time of Processes
     pr[]: Priority
 */
-void hpf(PCB queue[100]) {
+void hpf(PCB readyQueue[100]) {
 
     // Cantidad de procesos
     int n =  getQueueSize(queue);
@@ -225,7 +249,7 @@ void hpf(PCB queue[100]) {
     bt[]: Burst Time of Processes
    
 */
-void fifo(PCB queue[100]) {
+void fifo(PCB readyQueue[100]) {
     // Cantidad de procesos
     int n =  getQueueSize(queue);
     // Bursts
@@ -249,8 +273,8 @@ void fifo(PCB queue[100]) {
         }
         tat[i] = wt[i]+readyQueue[i].burst;
         // Iguala wt y tat en el PCB
-        readyQueue[i].wt = wt[i];
-        readyQueue[i].tat = tat[i];
+        queue[i].wt = wt[i];
+        queue[i].tat = tat[i];
         printf("%d\t\t\t%d\t\t\t%d\t\t\t%d\n",readyQueue[i].PID,readyQueue[i].burst,readyQueue[i].wt,readyQueue[i].tat);
     }
 
