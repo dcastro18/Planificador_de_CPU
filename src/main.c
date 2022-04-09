@@ -87,54 +87,7 @@ float getPromedioTAT(PCB queue[100]) {
     return  promedio;
 }
 
-void hpf(PCB readyQueue[100]) {
 
-    // Cantidad de procesos
-    int n =  getQueueSize(readyQueue);
-    // Contadores
-    int i,j;
-    // PCB Temporal
-    PCB temp;
-    // Waiting Time
-    int wt[30];
-    // Turn Around Time
-    int tat[30];
-    
-    // Bubblesort por priority
-    for (i = 0; i < n ; i++)
-    {
-        int pos=i;
-        for(j=i+1;j<n;j++)
-        {
-            if(readyQueue[j].priority <readyQueue[pos].priority)
-            {
-                pos=j;
-            }
-        }
-        temp=readyQueue[i];
-        readyQueue[i]=readyQueue[pos];
-        readyQueue[pos]=temp;
-
-    }
-    wt[0]=0;
-    printf("process \t burst time\t priority \t waiting time \t turn around time\n");
-
-    for (i=0 ; i < n; i++)
-    {
-        wt[i]=0;
-        tat[i]=0;
-        for (j=0;j<i;j++)
-        {
-            wt[i]=wt[i]+readyQueue[j].burst;
-        }
-        tat[i]=wt[i]+readyQueue[i].burst;
-        // Iguala wt y tat en el PCB
-        readyQueue[i].wt = wt[i];
-        readyQueue[i].tat = tat[i];
-        printf("%d\t\t\t %d\t\t\t %d\t\t\t %d\t\t\t %d\n", readyQueue[i].PID, readyQueue[i].burst, readyQueue[i].priority,wt[i], tat[i]);
-    }
-
-}
 
 void *readFile (void *args) {
     // leer archivos
@@ -176,18 +129,13 @@ void *readFile (void *args) {
             int randNum = randNumber(3,8);
             sleep(randNum);
 
-            
         }
         i++;
     }
     fclose(fp); // closing file
+    // Print de Procesos
     printf("Cantidad de procesos: %d\t\n",getQueueSize(readyQueue));
     printQueue(readyQueue);
-    hpf(readyQueue);
-    printf("Despues de algoritmo: \n");
-    printQueue(readyQueue);
-    printf("\n Promedio de WT: %f\t\n",getPromedioWT(readyQueue));
-    printf("\n Promedio de TAT: %f\t\n",getPromedioTAT(readyQueue));
     
     // Hacer el random para dormir el hilo unos segundos antes de leer la siguiente linea
     //printf("number is: %d\n", randNumber(3,8));
