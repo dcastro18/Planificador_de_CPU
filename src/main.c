@@ -88,65 +88,7 @@ float getPromedioTAT(PCB queue[100]) {
 }
 
 
-void roundRobin(int qt,PCB queue[100]) {
-    // Cantidad de procesos
-    int n =  getQueueSize(queue);
-    int i;
-    int temp;
-    // Turn Around Time
-    int tat[100];
-    // Waiting Time
-    int wt[100];
-    // Remaining Burst Time
-    int rem_bt[100];
-    // Counter
-    int count = 0;
-    // SQ
-    int sq = 0;
-    
-    // Number of proccesses for and burst copying
-    for (i = 0; i < n ; i++){
-        rem_bt[i] = queue[i].burst;
-    }
 
-    while (1) {
-
-        for (i = 0, count = 0; i < n ; i++) 
-        {
-            
-            temp = qt;
-
-            if (rem_bt[i] == 0)
-            {
-                count++;
-                continue;
-            }
-
-            if (rem_bt[i] > qt)
-                rem_bt[i] = rem_bt[i]- qt;
-            else 
-                if (rem_bt[i] >= 0)
-                {
-                    temp = rem_bt[i];
-                    rem_bt[i] = 0;
-                }
-                sq = sq + temp;
-                tat[i] = sq;
-
-            
-        }
-        if (n == count) 
-            break;
-    }
-
-    printf("\nprocess\tburst time\tturnaround time\twaiting time\n");
-
-    for ( i = 0; i < n ; i++){
-        wt[i] = tat[i] - queue[i].burst;
-        printf("\n%d\t\t\t%d\t\t\t\t%d\t\t\t%d", queue[i].PID,queue[i].burst,tat[i],wt[i]);
-    }
-    
-}
 void *readFile (void *args) {
     // leer archivos
     FILE *fp; // declaration of file pointer
@@ -194,7 +136,7 @@ void *readFile (void *args) {
     // Print de Procesos
     printf("Cantidad de procesos: %d\t\n",getQueueSize(readyQueue));
     printQueue(readyQueue);
-    roundRobin(2,readyQueue);
+
     // Hacer el random para dormir el hilo unos segundos antes de leer la siguiente linea
     //printf("number is: %d\n", randNumber(3,8));
 

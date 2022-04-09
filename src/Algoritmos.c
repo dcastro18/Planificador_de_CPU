@@ -128,11 +128,10 @@ void roundRobin(int qt,PCB queue[100]) {
 
     for ( i = 0; i < n ; i++){
         wt[i] = tat[i] - queue[i].burst;
-        printf("\n%d\t\t\t%d\t\t\t\t%d\t\t\t%d", i + 1,queue[i].burst,tat[i],wt[i]);
+        printf("\n%d\t\t\t%d\t\t\t\t%d\t\t\t%d", queue[i].PID,queue[i].burst,tat[i],wt[i]);
     }
     
 }
-
 
 // SJF
 /*
