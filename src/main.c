@@ -136,7 +136,7 @@ void *readFile (void *args) {
     // Print de Procesos
     printf("Cantidad de procesos: %d\t\n",getQueueSize(readyQueue));
     printQueue(readyQueue);
-    
+
     // Hacer el random para dormir el hilo unos segundos antes de leer la siguiente linea
     //printf("number is: %d\n", randNumber(3,8));
 
