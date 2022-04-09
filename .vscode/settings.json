@@ -4,6 +4,7 @@
         "limits": "c",
         "algorithm": "c",
         "stat.h": "c",
-        "time.h": "c"
+        "time.h": "c",
+        "queue": "c"
     }
 }

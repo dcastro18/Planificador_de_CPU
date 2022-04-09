@@ -5,11 +5,18 @@
 #include <string.h>
 #include <time.h>
 
-typedef struct dato {
+
+// Cola
+typedef struct PCB {
     int PID;
     int burst;
     int priority;
+    int tat;
+    int wt;
 } PCB;
+
+// Variable global
+PCB readyQueue[100];
 
 int randNumber(int min, int max) {
     time_t t;
@@ -20,9 +27,66 @@ int randNumber(int min, int max) {
 
 void *sendData (void *args) {
     char *msg = (char *)args;
-    printf("%s",msg);
+    //printf("%s",msg);
     // enviar msg por el socket
 }
+
+// Auxiliar para obtener la cantidad de procesos en el Queue
+int getQueueSize(PCB queue[100]) {
+    int i = 0;
+    int counter = 0;
+    for (i = 0 ; i < 100 ; i++) {
+        if (queue[i].PID == 0 & queue[i].burst == 0 & queue[i].priority==0){
+            break;
+        }
+        else
+            counter++;
+
+    }
+    return counter;
+}
+
+// Print para los Queue
+void printQueue(PCB queue[100]) {
+    printf("process \t burst time\t priority \t waiting time \t turn around time\n");
+    for (int j = 0 ; j < 10 ; j++){
+        
+        if (queue[j].PID == 0 & queue[j].burst == 0 & queue[j].priority==0){
+            break;
+        }
+        else {
+            
+            printf("%d\t\t\t%d\t\t\t%d\t\t%d\t\t\t%d\n",readyQueue[j].PID,readyQueue[j].burst,readyQueue[j].priority,readyQueue[j].wt,readyQueue[j].tat);
+        }
+        
+    }
+}
+// Calculo de promedios de WT
+float getPromedioWT(PCB queue[100]) { 
+    float promedio = 0.0;
+    float n = (float)getQueueSize(queue);
+    int temp = 0;
+    int j = getQueueSize(queue);
+    for (int i = 0; i < j ; i++){
+        temp = temp + queue[i].wt;
+    }
+    promedio = temp/n;
+    return  promedio;
+}
+// Calculo de promedios de TAT
+
+float getPromedioTAT(PCB queue[100]) { 
+    float promedio = 0.0;
+    float n = (float)getQueueSize(queue);
+    int temp = 0;
+    int j = getQueueSize(queue);
+    for (int i = 0; i < j ; i++){
+        temp = temp + queue[i].tat;
+    }
+    promedio = temp/n;
+    return  promedio;
+}
+
 
 
 void *readFile (void *args) {
@@ -52,47 +116,46 @@ void *readFile (void *args) {
             pthread_t pthread;
             pthread_create(&pthread,NULL, sendData, (void *)&con);
             pthread_join(pthread,NULL);
-
+            
             // Recibo el PID y creo el hilo con ese ID (y con la info)
-            char PID[] = "1";
-            printf("El PID es %s\n",PID);
+            // Crea el PCB
+            PCB pcbTemp;
+            pcbTemp.PID = i;
+            pcbTemp.burst = con[0] - '0';
+            pcbTemp.priority = con[2]- '0';
+            
+            readyQueue[i-1] = pcbTemp;
+            // Crea numero random
             int randNum = randNumber(3,8);
             sleep(randNum);
+
         }
         i++;
     }
     fclose(fp); // closing file
+    // Print de Procesos
+    printf("Cantidad de procesos: %d\t\n",getQueueSize(readyQueue));
+    printQueue(readyQueue);
 
     // Hacer el random para dormir el hilo unos segundos antes de leer la siguiente linea
     //printf("number is: %d\n", randNumber(3,8));
 
 }
 
+
+
+
+
+
+
+
+
+
+
 int main(int argc, char const *argv[])
 {
 
-/*
-    PCB pcb;
-    pcb.PID= 1;
-    pcb.burst = 4;
-    pcb.priority = 1;
-
-    PCB readyQueue[100];
-    int lenProcesses=1;
-
-    readyQueue[lenProcesses] = pcb;
-    //int lenReadyQueue = sizeof(readyQueue)/sizeof(readyQueue[0]);;
-
-*/
-
-    //int pBurst = readyQueue[lenProcesses].PID;
-
-    /*for (int i = PID_deleted; i < lenProcesses; ++i) {
-        readyQueue[i] = readyQueue[i+1];
-    }*/
-
-    //printf("%d\n",readyQueue[50].PID);
-
+    
     int n, opcion;
 
     do
