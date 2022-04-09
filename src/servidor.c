@@ -18,6 +18,8 @@ int processCounter = 0;
 
 // crear 2 hilos distintos (Job y cpu scheduler)
 
+
+
 int main(int argc, char const *argv[])
 {
     /*
