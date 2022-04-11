@@ -69,6 +69,42 @@ void *sendData (void *args) {
     // matar el thread
 }
 
+typedef struct Rango {
+    int min;
+    int max;
+} Rango;
+
+char numToASCII(int num) {
+    return (char)num;
+}
+
+void *automatic (void *args)
+{
+    Rango *r1 = (Rango *)args;
+    pthread_t pthread;
+
+    char con[20];
+    
+    while(1)
+    {
+        sleep(2);
+        int randBurst = randNumber(r1->min,r1->max);
+        int randPriority = randNumber(1,5);
+
+        con[0] = randBurst + '0';
+        con[1] = ';';
+        con[2] = randPriority + '0';
+
+        printf("Palabra:  %s",con);
+
+        pthread_create(&pthread,NULL, sendData, (void *)&con);
+        pthread_join(pthread,NULL);
+
+        int randNum = randNumber(3,8);
+        sleep(randNum);
+    }
+
+}
 
 void *readFile (void *args) {
     // leer archivos
@@ -81,9 +117,6 @@ void *readFile (void *args) {
     fseek(fp, 0 , SEEK_END);
     long fileSize = ftell(fp);
     fseek(fp, 0 , SEEK_SET);// needed for next read from beginning of file
-
-    // Number of lines in the file -1 is the amount of processes
-    int amountOfProcess = -1;
 
     char con[fileSize]; // variable to read the content
     int i = 0;
@@ -100,8 +133,8 @@ void *readFile (void *args) {
             pthread_create(&pthread,NULL, sendData, (void *)&con);
             pthread_join(pthread,NULL);
 
-            //int randNum = randNumber(3,8);
-            //sleep(randNum);
+            int randNum = randNumber(3,8);
+            sleep(randNum);
         }
         i++;
     }
@@ -114,23 +147,22 @@ int main(int argc, char const *argv[])
 {
 
     pthread_t mainThread;
-    int n, opcion;
+
+
+    int min, max, opcion;
 
     do
     {
-        printf( "\n   Bienvenido al menú del cliente");
-        printf( "\n   1. Cliente manual." );
-        printf( "\n   2. Cliente automático");
-        printf( "\n   3. Salir." );
+        printf( "\nBienvenido al menú del cliente");
+        printf( "\n 1. Cliente manual." );
+        printf( "\n 2. Cliente automático");
+        printf( "\n 3. Salir." );
         printf( "\n\n  Introduzca opción que desee (1-3): ");
 
         scanf( "%d", &opcion );
 
         /* Inicio del anidamiento */
 
-
-
-        // crear el socket
 
         switch ( opcion )
         {
@@ -140,6 +172,16 @@ int main(int argc, char const *argv[])
                 break;
 
             case 2:
+                printf( "\nIngrese el valor minimo y maximo del rango, separados por un espacio: ");
+                scanf( "%d %d", &min, &max );
+
+
+                Rango r1;
+                r1.min = min;
+                r1.max = max;
+
+                pthread_create(&mainThread,NULL, (void *)automatic,(void *)&r1);
+                pthread_join(mainThread,NULL);
                 break;
 
             case 3:
