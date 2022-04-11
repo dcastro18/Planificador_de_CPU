@@ -78,11 +78,22 @@
       <updated>1649202939085</updated>
       <workItem from="1649202941138" duration="423000" />
       <workItem from="1649203446315" duration="23565000" />
-      <workItem from="1649555877537" duration="11369000" />
+      <workItem from="1649555877537" duration="43775000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/Algoritmos.h</url>
+          <line>8</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

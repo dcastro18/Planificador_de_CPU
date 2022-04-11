@@ -8,8 +8,21 @@ typedef struct PCB {
     int wt;
 } PCB;
 
-// Variable global
-PCB readyQueue[100];
+// Auxiliar para obtener la cantidad de procesos en el Queue
+int getQueueSize(PCB queue[100]) {
+    int i = 0;
+    int counter = 0;
+    for (i = 0 ; i < 100 ; i++) {
+        if (queue[i].PID == 0 & queue[i].burst == 0 & queue[i].priority==0){
+            break;
+        }
+        else
+            counter++;
+
+    }
+    return counter;
+}
+
 // Calculo de promedios de WT
 float getPromedioWT(PCB queue[100]) { 
     float promedio = 0.0;
@@ -35,34 +48,36 @@ float getPromedioTAT(PCB queue[100]) {
     promedio = temp/n;
     return  promedio;
 }
-// Auxiliar para obtener la cantidad de procesos en el Queue
-int getQueueSize(PCB queue[100]) {
-    int i = 0;
-    int counter = 0;
-    for (i = 0 ; i < 100 ; i++) {
-        if (queue[i].PID == 0 & queue[i].burst == 0 & queue[i].priority==0){
-            break;
-        }
-        else
-            counter++;
 
-    }
-    return counter;
-}
 
 // Auxiliar para print de los Queue
 void printQueue(PCB queue[100]) {
-    printf("PID \t burst time \t waiting time \t turn around time\n");
-    for (int j = 0 ; j < 10 ; j++){
+    printf("\nPID\t\t\tBurst Time\t\tWaiting Time\t\tTurn Around Time\n");
+    for (int j = 0 ; j < 100 ; j++){
         
         if (queue[j].PID == 0 & queue[j].burst == 0 & queue[j].priority==0){
             break;
         }
         else {
             
-            printf("%d\t\t\t%d\t\t\t%d\t\t\t%d\n",readyQueue[j].PID,readyQueue[j].burst,readyQueue[j].wt,readyQueue[j].tat);
+            printf("%d\t\t\t%d\t\t\t%d\t\t\t%d\n",queue[j].PID,queue[j].burst,queue[j].wt,queue[j].tat);
         }
         
+    }
+}
+
+void printReadyQueue(PCB queue[100]) {
+    printf("\nPID\t\t\tBurst Time\t\tPrioridad\n");
+    for (int j = 0 ; j < 100 ; j++){
+
+        if (queue[j].PID == 0 & queue[j].burst == 0 & queue[j].priority==0){
+            break;
+        }
+        else {
+
+            printf("%d\t\t\t%d\t\t\t%d\n",queue[j].PID,queue[j].burst,queue[j].priority);
+        }
+
     }
 }
 
@@ -73,7 +88,7 @@ void printQueue(PCB queue[100]) {
     qt: Quantum Time
     bt[]: Burst Time of Processes
 */
-void roundRobin(int qt,PCB queue[100]) {
+void roundRobin(int qt, PCB queue[100]) {
     // Cantidad de procesos
     int n =  getQueueSize(queue);
     int i;
@@ -117,7 +132,6 @@ void roundRobin(int qt,PCB queue[100]) {
                 }
                 sq = sq + temp;
                 tat[i] = sq;
-
             
         }
         if (n == count) 
@@ -140,7 +154,7 @@ void roundRobin(int qt,PCB queue[100]) {
     p[]: Process Number
 
 */
-void sjf(PCB readyQueue[100]) {
+void sjf(PCB queue[100]) {
     // Cantidad de procesos
     int n =  getQueueSize(queue);
     int i,j;
@@ -154,11 +168,11 @@ void sjf(PCB readyQueue[100]) {
     {
         for (j = 0 ; j < n-i-1; j++ )
         {
-            if (readyQueue[j].burst > readyQueue[j+1].burst) 
+            if (queue[j].burst > queue[j+1].burst)
             {
-                temp = readyQueue[j];
-                readyQueue[j] = readyQueue[j+1];
-                readyQueue[j+1] = temp;
+                temp = queue[j];
+                queue[j] = queue[j+1];
+                queue[j+1] = temp;
 
             }
         }
@@ -172,12 +186,12 @@ void sjf(PCB readyQueue[100]) {
         tat[i]=0;
         for (j=0;j<i;j++)
         {
-            wt[i] = wt[i]+readyQueue[j].burst;
+            wt[i] = wt[i]+queue[j].burst;
         }
-        tat[i]= wt[i]+readyQueue[i].burst;
-        readyQueue[i].tat = tat[i];
-        readyQueue[i].wt = wt[i];
-        printf("%d\t\t\t %d\t\t\t %d\t\t\t %d\n", readyQueue[i].PID, readyQueue[i].burst, readyQueue[i].wt, readyQueue[i].tat);
+        tat[i]= wt[i]+queue[i].burst;
+        queue[i].tat = tat[i];
+        queue[i].wt = wt[i];
+        printf("%d\t\t\t %d\t\t\t %d\t\t\t %d\n", queue[i].PID, queue[i].burst, queue[i].wt, queue[i].tat);
 
 
     }
@@ -193,7 +207,7 @@ void sjf(PCB readyQueue[100]) {
     bt[]: Burst Time of Processes
     pr[]: Priority
 */
-void hpf(PCB readyQueue[100]) {
+void hpf(PCB queue[100]) {
 
     // Cantidad de procesos
     int n =  getQueueSize(queue);
@@ -212,14 +226,14 @@ void hpf(PCB readyQueue[100]) {
         int pos=i;
         for(j=i+1;j<n;j++)
         {
-            if(readyQueue[j].priority <readyQueue[pos].priority)
+            if(queue[j].priority <queue[pos].priority)
             {
                 pos=j;
             }
         }
-        temp=readyQueue[i];
-        readyQueue[i]=readyQueue[pos];
-        readyQueue[pos]=temp;
+        temp=queue[i];
+        queue[i]=queue[pos];
+        queue[pos]=temp;
 
     }
     wt[0]=0;
@@ -231,13 +245,13 @@ void hpf(PCB readyQueue[100]) {
         tat[i]=0;
         for (j=0;j<i;j++)
         {
-            wt[i]=wt[i]+readyQueue[j].burst;
+            wt[i]=wt[i]+queue[j].burst;
         }
-        tat[i]=wt[i]+readyQueue[i].burst;
+        tat[i]=wt[i]+queue[i].burst;
         // Iguala wt y tat en el PCB
-        readyQueue[i].wt = wt[i];
-        readyQueue[i].tat = tat[i];
-        printf("%d\t\t\t %d\t\t\t %d\t\t\t %d\t\t\t %d\n", readyQueue[i].PID, readyQueue[i].burst, readyQueue[i].priority,wt[i], tat[i]);
+        queue[i].wt = wt[i];
+        queue[i].tat = tat[i];
+        printf("%d\t\t\t %d\t\t\t %d\t\t\t %d\t\t\t %d\n", queue[i].PID, queue[i].burst, queue[i].priority,wt[i], tat[i]);
     }
 
 }
@@ -249,7 +263,7 @@ void hpf(PCB readyQueue[100]) {
     bt[]: Burst Time of Processes
    
 */
-void fifo(PCB readyQueue[100]) {
+void fifo(PCB queue[100]) {
     // Cantidad de procesos
     int n =  getQueueSize(queue);
     // Bursts
@@ -260,7 +274,9 @@ void fifo(PCB readyQueue[100]) {
     // Turn Around Time
     int tat[100];
 
-    printf("process\t\t burst time\t waiting time\t turn around time\n");
+    printf("Proceso %d con burst %d entra en ejecución \n",queue[0].PID,queue[0].burst);
+
+   // printf("process\t\t burst time\t waiting time\t turn around time\n");
     for( i = 0 ; i < n ; i++)
     {
         wt[i] = 0;
@@ -269,13 +285,13 @@ void fifo(PCB readyQueue[100]) {
 
         for (j=0 ; j < i ; j++)
         {
-            wt[i] = wt[i]+readyQueue[j].burst;
+            wt[i] = wt[i]+queue[j].burst;
         }
-        tat[i] = wt[i]+readyQueue[i].burst;
+        tat[i] = wt[i]+queue[i].burst;
         // Iguala wt y tat en el PCB
         queue[i].wt = wt[i];
         queue[i].tat = tat[i];
-        printf("%d\t\t\t%d\t\t\t%d\t\t\t%d\n",readyQueue[i].PID,readyQueue[i].burst,readyQueue[i].wt,readyQueue[i].tat);
+       // printf("%d\t\t\t%d\t\t\t%d\t\t\t%d\n",queue[i].PID,queue[i].burst,queue[i].wt,queue[i].tat);
     }
 
 }
