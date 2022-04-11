@@ -6,9 +6,6 @@
 #include <time.h>
 #include "Algoritmos.h"
 
-
-
-
 int randNumber(int min, int max) {
     time_t t;
     srand((unsigned) time(&t));
@@ -21,7 +18,6 @@ void *sendData (void *args) {
     //printf("%s",msg);
     // enviar msg por el socket
 }
-
 
 
 
@@ -74,16 +70,9 @@ void *readFile (void *args) {
     printQueue(readyQueue);
     fifo(readyQueue);
     // Hacer el random para dormir el hilo unos segundos antes de leer la siguiente linea
-    //printf("number is: %d\n", randNumber(3,8));
+    printf("number is: %d\n", randNumber(3,8));
 
 }
-
-
-
-
-
-
-
 
 
 
