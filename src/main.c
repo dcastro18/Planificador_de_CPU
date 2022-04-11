@@ -4,19 +4,10 @@
 #include <pthread.h>
 #include <string.h>
 #include <time.h>
+#include "Algoritmos.h"
 
 
-// Cola
-typedef struct PCB {
-    int PID;
-    int burst;
-    int priority;
-    int tat;
-    int wt;
-} PCB;
 
-// Variable global
-PCB readyQueue[100];
 
 int randNumber(int min, int max) {
     time_t t;
@@ -31,61 +22,6 @@ void *sendData (void *args) {
     // enviar msg por el socket
 }
 
-// Auxiliar para obtener la cantidad de procesos en el Queue
-int getQueueSize(PCB queue[100]) {
-    int i = 0;
-    int counter = 0;
-    for (i = 0 ; i < 100 ; i++) {
-        if (queue[i].PID == 0 & queue[i].burst == 0 & queue[i].priority==0){
-            break;
-        }
-        else
-            counter++;
-
-    }
-    return counter;
-}
-
-// Print para los Queue
-void printQueue(PCB queue[100]) {
-    printf("process \t burst time\t priority \t waiting time \t turn around time\n");
-    for (int j = 0 ; j < 10 ; j++){
-        
-        if (queue[j].PID == 0 & queue[j].burst == 0 & queue[j].priority==0){
-            break;
-        }
-        else {
-            
-            printf("%d\t\t\t%d\t\t\t%d\t\t%d\t\t\t%d\n",readyQueue[j].PID,readyQueue[j].burst,readyQueue[j].priority,readyQueue[j].wt,readyQueue[j].tat);
-        }
-        
-    }
-}
-// Calculo de promedios de WT
-float getPromedioWT(PCB queue[100]) { 
-    float promedio = 0.0;
-    float n = (float)getQueueSize(queue);
-    int temp = 0;
-    int j = getQueueSize(queue);
-    for (int i = 0; i < j ; i++){
-        temp = temp + queue[i].wt;
-    }
-    promedio = temp/n;
-    return  promedio;
-}
-// Calculo de promedios de TAT
-
-float getPromedioTAT(PCB queue[100]) { 
-    float promedio = 0.0;
-    float n = (float)getQueueSize(queue);
-    int temp = 0;
-    int j = getQueueSize(queue);
-    for (int i = 0; i < j ; i++){
-        temp = temp + queue[i].tat;
-    }
-    promedio = temp/n;
-    return  promedio;
-}
 
 
 
@@ -106,7 +42,7 @@ void *readFile (void *args) {
 
     char con[fileSize]; // variable to read the content
     int i = 0;
-
+    PCB readyQueue[100];
     while (fgets(con,fileSize, fp)!=NULL) { // reading file content
 
         if(i != 0)
@@ -136,7 +72,7 @@ void *readFile (void *args) {
     // Print de Procesos
     printf("Cantidad de procesos: %d\t\n",getQueueSize(readyQueue));
     printQueue(readyQueue);
-
+    fifo(readyQueue);
     // Hacer el random para dormir el hilo unos segundos antes de leer la siguiente linea
     //printf("number is: %d\n", randNumber(3,8));
 
