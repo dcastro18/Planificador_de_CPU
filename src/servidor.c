@@ -5,16 +5,14 @@
 #include <string.h>
 #include <time.h>
 
+#include "Algoritmos.h"
+
 #include<sys/types.h>
 #include<sys/socket.h>
 #include<netinet/in.h>
 #include<arpa/inet.h>
 
-typedef struct PCB {
-    int PID;
-    int burst;
-    int priority;
-} PCB;
+
 
 
 // variables globales
@@ -22,6 +20,17 @@ typedef struct PCB {
 PCB readyQueue[100];
 PCB processHistory[100];
 int processCounter = 0;
+
+pthread_t jobscheduler;
+pthread_t cpuscheduler;
+pthread_t action;
+pthread_t timer;
+
+int algorithmID = 0;
+int qt = 0;
+int leisureTime= 0;
+
+int working = 0;
 
 int server_sockfd, client_sockfd; // descriptores de sockets
 int server_len, client_len; //tamaÃ±os de las estructuras
@@ -39,12 +48,160 @@ int puerto; //variable para el puerto
 
 // crear 2 hilos distintos (Job y cpu scheduler)
 
-void *startCPUScheduler (void *args) {
-    //char *msg = (char *)args;
-    //printf("%s",msg);
-    // enviar msg por el socket
+void *startTimer () {
 
-    // matar el thread
+    while(1)
+    {
+        if(!working)
+        {
+            leisureTime++;
+        }
+        sleep(1);
+
+    }
+}
+
+void *startActionThread () {
+
+    char msg[1];
+    while(1)
+    {
+        scanf( "%s", msg );
+        if(msg[0] == 'c')
+        {
+            fflush(stdout);
+            printf("________________________________________________________\n");
+            printReadyQueue(readyQueue);
+            printf("________________________________________________________\n");
+
+        }
+        else if(msg[0] == 'd')
+        {
+            pthread_cancel(jobscheduler);
+            pthread_cancel(cpuscheduler);
+            pthread_cancel(timer);
+
+            fflush(stdout);
+            printf("\n --- Resumen de ejecución --- \n");
+            int n =  getQueueSize(processHistory);
+            printf("Cantidad de procesos ejecutados : %d\n",n);
+            printf("Cantidad de segundos con CPU ocioso: %d\n",leisureTime);
+            printQueue(processHistory);
+            printf("\nPromedio de Waiting Time: %f\n", getPromedioWT(processHistory));
+            printf("Promedio de Turn Around Time: %f\n", getPromedioTAT(processHistory));
+            //break;
+        }
+
+    }
+
+
+
+
+}
+
+void bubbleSortSJF() {
+    // Cantidad de procesos
+    int n =  getQueueSize(readyQueue);
+    // Contadores
+    int i,j;
+    // PCB Temporal
+    PCB temp;
+    // Applying bubble sort tecnique to sort according to burst time
+    for (i = 0; i < n ; i++)
+    {
+        for (j = 0 ; j < n-i-1; j++ )
+        {
+            if (readyQueue[j].burst > readyQueue[j+1].burst)
+            {
+                temp = readyQueue[j];
+                readyQueue[j] = readyQueue[j+1];
+                readyQueue[j+1] = temp;
+
+            }
+        }
+
+    }
+
+}
+
+void bubbleSortHPF() {
+    // Cantidad de procesos
+    int n =  getQueueSize(readyQueue);
+    // Contadores
+    int i,j;
+    // PCB Temporal
+    PCB temp;
+    // Bubblesort por priority
+    for (i = 0; i < n ; i++)
+    {
+        int pos=i;
+        for(j=i+1;j<n;j++)
+        {
+            if(readyQueue[j].priority <readyQueue[pos].priority)
+            {
+                pos=j;
+            }
+        }
+        temp=readyQueue[i];
+        readyQueue[i]=readyQueue[pos];
+        readyQueue[pos]=temp;
+    }
+}
+
+int updateQueue()
+{
+    int lenProcessHistory = getQueueSize(processHistory);
+    processHistory[lenProcessHistory] = readyQueue[0];
+    int lenReadyQueue = getQueueSize(readyQueue);
+    for (int i = 0; i < lenReadyQueue ; i++) {
+        readyQueue[i] = readyQueue[i + 1];
+    }
+}
+
+void *startCPUScheduler () {
+
+    while (1)
+    {
+        int lenReadyQueue = getQueueSize(readyQueue);
+        if(lenReadyQueue>0)
+        {
+            switch ( algorithmID ) {
+                case 1:
+                    fifo(readyQueue);
+                    working = 1;
+                    sleep(readyQueue[0].burst);
+                    printf("El proceso con ID: %d, ha finalzado\n\n",readyQueue[0].PID);
+                    updateQueue();
+                    working = 0;
+
+                    break;
+
+                case 2:
+                    bubbleSortSJF();
+                    sjf(readyQueue);
+                    working = 1;
+                    sleep(readyQueue[0].burst);
+                    updateQueue();
+                    working = 0;
+                    break;
+
+                case 3:
+                    bubbleSortHPF();
+                    hpf(readyQueue);
+                    working = 1;
+                    sleep(readyQueue[0].burst);
+                    updateQueue();
+                    working = 0;
+                    break;
+
+                case 4:
+
+                    break;
+
+            }
+        }
+    }
+
 }
 
 void *startJobScheduler () {
@@ -73,13 +230,22 @@ void *startJobScheduler () {
             send(client_sockfd, ch, 1024, 0);
             inicio = 1;
         }
+        fflush(stdout);
         recv(client_sockfd, cs, 1024,0);
-        printf("PCB Info : %s\n",cs);
         processCounter++;
+
+        // Crea el PCB
+        PCB pcbTemp;
+        pcbTemp.PID = processCounter;
+        pcbTemp.burst = cs[0] - '0';
+        pcbTemp.priority = cs[2] - '0';
+
+        int lenReadyQueue = getQueueSize(readyQueue);
+
+        readyQueue[lenReadyQueue] = pcbTemp;
 
         char PID[1024];
         sprintf(PID,"%d",processCounter);
-       // send(client_sockfd, ch, 1024, 0);
         send(client_sockfd, PID, 1024,0);
 
         close(client_sockfd);
@@ -93,23 +259,17 @@ void *startJobScheduler () {
 
 int main(int argc, char const *argv[])
 {
-
-    //int lenReadyQueue = sizeof(readyQueue)/sizeof(readyQueue[0]);;
-
-    int n, opcion;
-
-    pthread_t jobScheduler;
-    pthread_t cpuScheduler;
+    int opcion;
 
     do
     {
-        printf( "\n   Bienvenido al menú del servidor");
-        printf( "\n   1. FIFO." );
-        printf( "\n   2. SJF.");
-        printf( "\n   3. RR." );
-        printf( "\n   4. HPF." );
-        printf( "\n   5. Salir." );
-        printf( "\n\n   Seleccione el algoritmo que desee (1-4): ");
+        printf( "\nBienvenido al menú del servidor");
+        printf( "\n 1. FIFO." );
+        printf( "\n 2. SJF.");
+        printf( "\n 3. HPF." );
+        printf( "\n 4. RR." );
+        printf( "\n 5. Salir." );
+        printf( "\n\n Seleccione el algoritmo que desee (1-4): ");
 
         scanf( "%d", &opcion );
 
@@ -118,31 +278,38 @@ int main(int argc, char const *argv[])
         switch ( opcion )
         {
             case 1:
-                pthread_create(&jobScheduler,NULL, startJobScheduler,NULL);
-                pthread_join(jobScheduler,NULL);
-
-                //pthread_create(&cpuScheduler,NULL, startCPUScheduler,NULL);
-                //pthread_join(cpuScheduler,NULL);
-
-
-                //aca se deben morir
+                algorithmID = 1;
                 break;
 
             case 2:
-                printf("wtf");
+                algorithmID = 2;
                 break;
 
             case 3:
-
+                algorithmID = 3;
                 break;
 
             case 4:
+                algorithmID = 4;
+                printf( "\n\n Escriba el quantum que desee: ");
+                scanf( "%d", &qt );
 
                 break;
         }
 
-        /* Fin del anidamiento */
+        /* fin del anidamiento */
 
     } while ( opcion < 0 || opcion > 4 );
+
+    pthread_create(&jobscheduler,NULL, startJobScheduler,NULL);
+    pthread_create(&cpuscheduler,NULL, startCPUScheduler,NULL);
+    pthread_create(&action,NULL, startActionThread,NULL);
+    pthread_create(&timer,NULL, startTimer,NULL);
+    pthread_join(jobscheduler,NULL);
+    pthread_join(cpuscheduler,NULL);
+    pthread_join(action,NULL);
+    pthread_join(timer,NULL);
+
+
     return 0;
 }
