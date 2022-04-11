@@ -121,6 +121,8 @@ void bubbleSortSJF() {
         }
 
     }
+    //printf("Print de Bubl\n");
+    //printQueue(readyQueue);
 
 }
 
@@ -159,7 +161,7 @@ int updateQueue()
 }
 
 void *startCPUScheduler () {
-
+    
     while (1)
     {
         int lenReadyQueue = getQueueSize(readyQueue);
@@ -181,6 +183,7 @@ void *startCPUScheduler () {
                     sjf(readyQueue);
                     working = 1;
                     sleep(readyQueue[0].burst);
+                    printf("El proceso con ID: %d, ha finalzado\n\n",readyQueue[0].PID);
                     updateQueue();
                     working = 0;
                     break;
@@ -190,6 +193,7 @@ void *startCPUScheduler () {
                     hpf(readyQueue);
                     working = 1;
                     sleep(readyQueue[0].burst);
+                    printf("El proceso con ID: %d, ha finalzado\n\n",readyQueue[0].PID);
                     updateQueue();
                     working = 0;
                     break;
@@ -272,7 +276,7 @@ int main(int argc, char const *argv[])
         printf( "\n\n Seleccione el algoritmo que desee (1-4): ");
 
         scanf( "%d", &opcion );
-
+        
         // crear el socket
 
         switch ( opcion )
@@ -283,6 +287,7 @@ int main(int argc, char const *argv[])
 
             case 2:
                 algorithmID = 2;
+                
                 break;
 
             case 3:

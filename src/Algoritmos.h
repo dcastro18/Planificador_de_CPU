@@ -21,17 +21,6 @@ int getQueueSize(PCB queue[100]) {
     int i = 0;
     int counter = 0;
     for (i = 0 ; i < 100 ; i++) {
-        if (queue[i].PID == 0 & queue[i].burst == 0 & queue[i].priority == 0){
-            break;
-        }
-        else
-            counter++;
-
-// Auxiliar para obtener la cantidad de procesos en el Queue
-int getQueueSize(PCB queue[100]) {
-    int i = 0;
-    int counter = 0;
-    for (i = 0 ; i < 100 ; i++) {
         if (queue[i].PID == 0 & queue[i].burst == 0 & queue[i].priority==0){
             break;
         }
@@ -73,8 +62,6 @@ float getPromedioTAT(PCB queue[100]) {
 // Auxiliar para print de los Queue
 void printQueue(PCB queue[100]) {
 
-    printf("PID \t burst time \t waiting time \t turn around time\n");
-    for (int j = 0 ; j < 10 ; j++){
 
     printf("\nPID\t\t\tBurst Time\t\tWaiting Time\t\tTurn Around Time\n");
     for (int j = 0 ; j < 100 ; j++){
@@ -181,24 +168,8 @@ void sjf(PCB queue[100]) {
     int wt[100];
     // Turn Around Time
     int tat[100];
-    // Applying bubble sort tecnique to sort according to burst time
-    for (i = 0; i < n ; i++)
-    {
-        for (j = 0 ; j < n-i-1; j++ )
-        {
-
-            if (queue[j].burst > queue[j+1].burst)
-
-            {
-                temp = queue[j];
-                queue[j] = queue[j+1];
-                queue[j+1] = temp;
-
-            }
-        }
-        
-    }
-    printf("process \t burst time \t waiting time \t turn around time\n");
+    
+    //printf("process \t burst time \t waiting time \t turn around time\n");
     for (i = 0 ; i < n; i++)
     {
         wt[i]=0;
@@ -210,35 +181,11 @@ void sjf(PCB queue[100]) {
         tat[i]= wt[i]+queue[i].burst;
         queue[i].tat = tat[i];
         queue[i].wt = wt[i];
-        printf("%d\t\t\t %d\t\t\t %d\t\t\t %d\n", queue[i].PID, queue[i].burst, queue[i].wt, queue[i].tat);
+        //printf("%d\t\t\t %d\t\t\t %d\t\t\t %d\n", queue[i].PID, queue[i].burst, queue[i].wt, queue[i].tat);
 
     }
 }
 
-void bubbleSortSJF() {
-    // Cantidad de procesos
-    int n =  getQueueSize(readyQueue);
-    // Contadores
-    int i,j;
-    // PCB Temporal
-    PCB temp;
-    // Applying bubble sort tecnique to sort according to burst time
-    for (i = 0; i < n ; i++)
-    {
-        for (j = 0 ; j < n-i-1; j++ )
-        {
-            if (readyQueue[j].burst > readyQueue[j+1].burst) 
-            {
-                temp = readyQueue[j];
-                readyQueue[j] = readyQueue[j+1];
-                readyQueue[j+1] = temp;
-
-            }
-        }
-        
-    }
-
-}
 
 
 // HPF
@@ -250,7 +197,7 @@ void bubbleSortSJF() {
 void hpf(PCB queue[100]) {
 
     // Cantidad de procesos
-    int n =  getQueueSize(readyQueue);
+    int n =  getQueueSize(queue);
     // Contadores
     int i,j;
     // PCB Temporal
@@ -260,22 +207,7 @@ void hpf(PCB queue[100]) {
     // Turn Around Time
     int tat[30];
     
-    // Bubblesort por priority
-    for (i = 0; i < n ; i++)
-    {
-        int pos=i;
-        for(j=i+1;j<n;j++)
-        {
-            if(queue[j].priority <queue[pos].priority)
-            {
-                pos=j;
-            }
-        }
-        temp=queue[i];
-        queue[i]=queue[pos];
-        queue[pos]=temp;
 
-    }
     wt[0]=0;
     printf("process \t burst time\t priority \t waiting time \t turn around time\n");
 
@@ -291,37 +223,13 @@ void hpf(PCB queue[100]) {
         // Iguala wt y tat en el PCB
         queue[i].wt = wt[i];
         queue[i].tat = tat[i];
-        printf("%d\t\t\t %d\t\t\t %d\t\t\t %d\t\t\t %d\n", queue[i].PID, queue[i].burst, queue[i].priority,wt[i], tat[i]);
+        printf("%d\t\t\t %d\t\t\t %d\t\t\t %d\t\t\t %d\n", queue[i].PID, queue[i].burst, queue[i].priority,queue[i].wt, queue[i].tat);
 
     }
 
 }
 
 
-void bubbleSortHPF() {
-    // Cantidad de procesos
-    int n =  getQueueSize(readyQueue);
-    // Contadores
-    int i,j;
-    // PCB Temporal
-    PCB temp;
-    // Bubblesort por priority
-    for (i = 0; i < n ; i++)
-    {
-        int pos=i;
-        for(j=i+1;j<n;j++)
-        {
-            if(readyQueue[j].priority <readyQueue[pos].priority)
-            {
-                pos=j;
-            }
-        }
-        temp=readyQueue[i];
-        readyQueue[i]=readyQueue[pos];
-        readyQueue[pos]=temp;
-
-    }
-}
 
 // FIFO
 /*
@@ -331,14 +239,14 @@ void bubbleSortHPF() {
 */
 void fifo(PCB queue[100]) {
     // Cantidad de procesos
-    int n =  getQueueSize(readyQueue);
+    int n =  getQueueSize(queue);
     int i,j;
     // Waiting Time
     int wt[100];
     // Turn Around Time
     int tat[100];
 
-    printf("Proceso %d con burst %d entra en ejecución \n",queue[0].PID,queue[0].burst);
+    //printf("Proceso %d con burst %d entra en ejecución \n",queue[0].PID,queue[0].burst);
 
    // printf("process\t\t burst time\t waiting time\t turn around time\n");
     for( i = 0 ; i < n ; i++)
