@@ -7,3 +7,6 @@ gcc cliente.c -o exeCliente -l pthread
 
 gcc servidor.c -o exeServidor -l pthread
 ./exeServidor
+
+gcc main.c -o ejecutable -l pthread
+./exeServidor

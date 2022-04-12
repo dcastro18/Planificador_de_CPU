@@ -6,6 +6,10 @@
 #include <time.h>
 #include "Algoritmos.h"
 
+
+// Variable global
+PCB readyQueue[100];
+
 int randNumber(int min, int max) {
     time_t t;
     srand((unsigned) time(&t));
@@ -18,9 +22,55 @@ void *sendData (void *args) {
     //printf("%s",msg);
     // enviar msg por el socket
 }
+void bubbleSortSJF() {
+    // Cantidad de procesos
+    int n =  getQueueSize(readyQueue);
+    // Contadores
+    int i,j;
+    // PCB Temporal
+    PCB temp;
+    // Applying bubble sort tecnique to sort according to burst time
+    for (i = 0; i < n ; i++)
+    {
+        for (j = 0 ; j < n-i-1; j++ )
+        {
+            if (readyQueue[j].burst > readyQueue[j+1].burst)
+            {
+                temp = readyQueue[j];
+                readyQueue[j] = readyQueue[j+1];
+                readyQueue[j+1] = temp;
 
+            }
+        }
 
+    }
 
+}
+
+void bubbleSortHPF() {
+    // Cantidad de procesos
+    int n =  getQueueSize(readyQueue);
+    // Contadores
+    int i,j;
+    // PCB Temporal
+    PCB temp;
+    // Bubblesort por priority
+    for (i = 0; i < n ; i++)
+    {
+        int pos=i;
+        for(j=i+1;j<n;j++)
+        {
+            if(readyQueue[j].priority <= readyQueue[pos].priority)
+            {
+                pos=j;
+            }
+            
+        }
+        temp=readyQueue[i];
+        readyQueue[i]=readyQueue[pos];
+        readyQueue[pos]=temp;
+    }
+}
 void *readFile (void *args) {
     // leer archivos
     FILE *fp; // declaration of file pointer
@@ -38,7 +88,7 @@ void *readFile (void *args) {
 
     char con[fileSize]; // variable to read the content
     int i = 0;
-    PCB readyQueue[100];
+
     while (fgets(con,fileSize, fp)!=NULL) { // reading file content
 
         if(i != 0)
@@ -67,13 +117,14 @@ void *readFile (void *args) {
     fclose(fp); // closing file
     // Print de Procesos
     printf("Cantidad de procesos: %d\t\n",getQueueSize(readyQueue));
+    
+    bubbleSortHPF();
+    hpf(readyQueue);
     printQueue(readyQueue);
-    fifo(readyQueue);
     // Hacer el random para dormir el hilo unos segundos antes de leer la siguiente linea
-    printf("number is: %d\n", randNumber(3,8));
+    //printf("number is: %d\n", randNumber(3,8));
 
 }
-
 
 
 

@@ -121,8 +121,7 @@ void bubbleSortSJF() {
         }
 
     }
-    //printf("Print de Bubl\n");
-    //printQueue(readyQueue);
+
 
 }
 
@@ -163,7 +162,8 @@ int updateQueue()
 void *startCPUScheduler () {
     
     while (1)
-    {
+    {   
+        
         int lenReadyQueue = getQueueSize(readyQueue);
         if(lenReadyQueue>0)
         {
@@ -191,6 +191,8 @@ void *startCPUScheduler () {
                 case 3:
                     bubbleSortHPF();
                     hpf(readyQueue);
+                    
+                    //printQueue(readyQueue);
                     working = 1;
                     sleep(readyQueue[0].burst);
                     printf("El proceso con ID: %d, ha finalzado\n\n",readyQueue[0].PID);
@@ -199,7 +201,14 @@ void *startCPUScheduler () {
                     break;
 
                 case 4:
-
+                    
+                    roundRobin(qt,readyQueue);
+                    //printQueue(readyQueue);
+                    working = 1;
+                    sleep(readyQueue[0].burst);
+                    printf("El proceso con ID: %d, ha finalzado\n\n",readyQueue[0].PID);
+                    updateQueue();
+                    working = 0;
                     break;
 
             }
@@ -306,6 +315,7 @@ int main(int argc, char const *argv[])
 
     } while ( opcion < 0 || opcion > 4 );
 
+    
     pthread_create(&jobscheduler,NULL, startJobScheduler,NULL);
     pthread_create(&cpuscheduler,NULL, startCPUScheduler,NULL);
     pthread_create(&action,NULL, startActionThread,NULL);
@@ -314,6 +324,7 @@ int main(int argc, char const *argv[])
     pthread_join(cpuscheduler,NULL);
     pthread_join(action,NULL);
     pthread_join(timer,NULL);
+    
 
 
     return 0;
