@@ -32,6 +32,9 @@ int leisureTime= 0;
 
 int working = 0;
 
+PCB exeProcess;
+
+
 int isFinished = 0 ;
 int server_sockfd, client_sockfd; // descriptores de sockets
 int server_len, client_len; //tamaÃ±os de las estructuras
@@ -49,16 +52,43 @@ int puerto; //variable para el puerto
 
 
 // crear 2 hilos distintos (Job y cpu scheduler)
+/*
+int numToASCII(PCB p) {
+    len ready 1
+    for (int i = 0; i < burst; ++i) {
+        plen = ready; 2
+        if(len!=plen)
+        {
+            ready[plen].wt = p.burst-i;
+        }
+        sleep(1);
+    }
+    return (char)num;
+}*/
+
+int burstSeconds = 0;
 
 void *startTimer () {
 
     while(1)
     {
         if(!isFinished){
-            if(!working)
+            if(exeProcess.PID != 0)
+            {
+                if(burstSeconds<exeProcess.burst)
+                {
+                    burstSeconds++;
+                }
+                else{
+                    exeProcess.PID = 0;
+                    burstSeconds = 0;
+                }
+            }
+            else
             {
                 leisureTime++;
             }
+
             sleep(1);
         }
         else{
@@ -185,11 +215,9 @@ void *startCPUScheduler () {
                 switch ( algorithmID ) {
                     case 1:
                         fifo(readyQueue);
-                        working = 1;
-                        sleep(readyQueue[0].burst);
+                        exeProcess = readyQueue[0];
                         printf("El proceso con ID: %d, ha finalzado\n\n",readyQueue[0].PID);
                         updateQueue();
-                        working = 0;
 
                         break;
 
@@ -261,10 +289,12 @@ void *startJobScheduler () {
             pcbTemp.PID = processCounter;
             pcbTemp.burst = cs[0] - '0';
             pcbTemp.priority = cs[2] - '0';
+            pcbTemp.wt =  exeProcess.burst - burstSeconds;
 
             int lenReadyQueue = getQueueSize(readyQueue);
 
             readyQueue[lenReadyQueue] = pcbTemp;
+
 
             char PID[1024];
             sprintf(PID,"%d",processCounter);
