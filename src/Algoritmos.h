@@ -89,11 +89,11 @@ void printReadyQueue(PCB queue[100]) {
     qt: Quantum Time
     bt[]: Burst Time of Processes
 */
-void roundRobin(int qt, PCB queue[100]) {
+PCB roundRobin(int qt,int restante, PCB queue[100]) {
 
 
     // Cantidad de procesos
-    int n =  getQueueSize(queue);
+
     int i;
     int temp;
     // Turn Around Time
@@ -106,7 +106,37 @@ void roundRobin(int qt, PCB queue[100]) {
     int count = 0;
     // SQ
     int sq = 0;
-    
+
+    int wtSum = 0;
+    int falta = 0;
+
+    int cont = 0;
+
+    printf("Proceso %d con burst %d entra en ejecución \n",queue[0].PID,queue[0].burst);
+
+    int n =  getQueueSize(queue);
+
+    if(n>0)
+    {
+        printf("\nRestante %d",restante);
+        if(restante>0)
+        {
+            PCB temp = queue[0];
+
+
+            temp.burst = restante;
+            for (int j = 1; j < n-1 ; j++) {
+                wtSum = wtSum + queue[j].burst;
+            }
+            temp.wt = queue[n].wt + wtSum;
+
+            return temp;
+        }
+    }
+
+
+    //}
+   /*
     // Number of proccesses for and burst copying
     for (i = 0; i < n ; i++){
         rem_bt[i] = queue[i].burst;
@@ -147,6 +177,7 @@ void roundRobin(int qt, PCB queue[100]) {
         wt[i] = tat[i] - queue[i].burst;
         printf("\n%d\t\t\t%d\t\t\t\t%d\t\t\t%d", queue[i].PID,queue[i].burst,tat[i],wt[i]);
     }
+    */
     
 }
 

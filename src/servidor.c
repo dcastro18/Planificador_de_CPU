@@ -26,6 +26,9 @@ pthread_t cpuscheduler;
 pthread_t action;
 pthread_t timer;
 
+
+pthread_mutex_t mutex;
+
 int algorithmID = 0;
 int qt = 0;
 int leisureTime= 0;
@@ -196,6 +199,7 @@ void *startCPUScheduler () {
     {
         if(!isFinished){
             int lenReadyQueue = getQueueSize(readyQueue);
+            int restante;
             if(lenReadyQueue>0)
             {
                 switch ( algorithmID ) {
@@ -231,8 +235,23 @@ void *startCPUScheduler () {
                         break;
 
                     case 4:
-                        roundRobin(qt,&readyQueue);
-                        printf("El proceso con ID: %d, ha finalzado\n\n",readyQueue[0].PID);
+                        restante = 0;
+                        exeProcess = readyQueue[0];
+                        if(exeProcess.burst > qt)
+                        {
+                            restante = exeProcess.burst - qt;
+                            roundRobin(qt,restante,&readyQueue);
+                            sleep(qt);
+
+                        }else
+                        {
+                            PCB prueba = roundRobin(qt,restante,&readyQueue);
+                            sleep(exeProcess.burst);
+                            //readyQueue[lenReadyQueue] = prueba;
+                            printf("El proceso con ID: %d, ha finalzado\n\n",readyQueue[0].PID);
+                        }
+
+                        updateQueue();
                         break;
 
                 }
@@ -296,11 +315,13 @@ void *startJobScheduler () {
             pcbTemp.PID = processCounter;
             pcbTemp.burst = atoi(burst);
             pcbTemp.priority = priority - '0';
-            pcbTemp.estado = 0;
+            pcbTemp.estado = 1;
 
             printf("\nDentro de la creacion %d",burstSeconds);
 
             int lenReadyQueue = getQueueSize(readyQueue);
+
+            pthread_mutex_lock(&mutex);
 
             readyQueue[lenReadyQueue] = pcbTemp;
 
@@ -321,6 +342,7 @@ void *startJobScheduler () {
                 readyQueue[lenReadyQueue-1].wt = exeProcess.burst - burstSeconds;
             }
 
+            pthread_mutex_unlock(&mutex);
 
             char PID[1024];
             sprintf(PID,"%d",processCounter);
@@ -383,6 +405,8 @@ int main(int argc, char const *argv[])
 
     } while ( opcion < 0 || opcion > 4 );
 
+    pthread_mutex_init(&mutex,NULL);
+
     pthread_create(&jobscheduler,NULL, startJobScheduler,NULL);
     pthread_create(&cpuscheduler,NULL, startCPUScheduler,NULL);
     pthread_create(&action,NULL, startActionThread,NULL);
@@ -391,6 +415,8 @@ int main(int argc, char const *argv[])
     pthread_join(cpuscheduler,NULL);
     pthread_join(action,NULL);
     pthread_join(timer,NULL);
+
+
 
 
     return 0;
