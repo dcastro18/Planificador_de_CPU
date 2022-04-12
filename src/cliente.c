@@ -28,6 +28,8 @@ char ipserver[16] = "127.0.0.1";
 int puerto = 5000;
 int bandera = 0; //*
 
+pthread_t mainThread;
+
 
 
 int randNumber(int min, int max) {
@@ -53,6 +55,7 @@ void *sendData (void *args) {
     if(result ==-1){
         bandera = 1; //*
         printf("Proceso Terminado\n");
+        pthread_cancel(mainThread);
         close(sockfd);
         return;
     }
@@ -153,9 +156,6 @@ void *readFile (void *args) {
 
 int main(int argc, char const *argv[])
 {
-
-    pthread_t mainThread;
-
 
     int min, max, opcion;
 

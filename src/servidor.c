@@ -29,10 +29,8 @@ pthread_t timer;
 int algorithmID = 0;
 int qt = 0;
 int leisureTime= 0;
-
-int working = 0;
-
 PCB exeProcess;
+int burstSeconds = 0;
 
 
 int isFinished = 0 ;
@@ -50,24 +48,6 @@ int ciclo = 1; //variable para ciclo de lectura escritura
 int puerto; //variable para el puerto
 
 
-
-// crear 2 hilos distintos (Job y cpu scheduler)
-/*
-int numToASCII(PCB p) {
-    len ready 1
-    for (int i = 0; i < burst; ++i) {
-        plen = ready; 2
-        if(len!=plen)
-        {
-            ready[plen].wt = p.burst-i;
-        }
-        sleep(1);
-    }
-    return (char)num;
-}*/
-
-int burstSeconds = 0;
-
 void *startTimer () {
 
     while(1)
@@ -75,9 +55,12 @@ void *startTimer () {
         if(!isFinished){
             if(exeProcess.PID != 0)
             {
+
                 if(burstSeconds<exeProcess.burst)
                 {
                     burstSeconds++;
+                    fflush(stdout);
+                    printf("\n En el timer %d", burstSeconds);
                 }
                 else{
                     exeProcess.PID = 0;
@@ -205,6 +188,8 @@ int updateQueue()
     }
 }
 
+int working;
+
 void *startCPUScheduler () {
 
     while (1)
@@ -216,9 +201,11 @@ void *startCPUScheduler () {
                 switch ( algorithmID ) {
                     case 1:
                         fifo(readyQueue);
+                        working = 1;
                         exeProcess = readyQueue[0];
+                        sleep(readyQueue[0].burst);
                         printf("El proceso con ID: %d, ha finalzado\n\n",readyQueue[0].PID);
-
+                        working = 0;
                         updateQueue();
 
                         break;
@@ -244,7 +231,8 @@ void *startCPUScheduler () {
                         break;
 
                     case 4:
-
+                        roundRobin(qt,&readyQueue);
+                        printf("El proceso con ID: %d, ha finalzado\n\n",readyQueue[0].PID);
                         break;
 
                 }
@@ -288,16 +276,50 @@ void *startJobScheduler () {
             recv(client_sockfd, cs, 1024,0);
             processCounter++;
 
+            char burst[10];
+
+            for (int i = 0; i < strlen(cs)-1 ; ++i) {
+                if(cs[i]!=';')
+                {
+                    burst[i] = cs[i];
+                }
+                else{
+                    burst[i] = '\0';
+                    break;
+                }
+
+            }
+            char priority = cs[strlen(cs)-2];
+
             // Crea el PCB
             PCB pcbTemp;
             pcbTemp.PID = processCounter;
-            pcbTemp.burst = cs[0] - '0';
-            pcbTemp.priority = cs[2] - '0';
+            pcbTemp.burst = atoi(burst);
+            pcbTemp.priority = priority - '0';
             pcbTemp.estado = 0;
-            pcbTemp.wt =  exeProcess.burst - burstSeconds;
+
+            printf("\nDentro de la creacion %d",burstSeconds);
+
             int lenReadyQueue = getQueueSize(readyQueue);
 
             readyQueue[lenReadyQueue] = pcbTemp;
+
+            lenReadyQueue++;
+
+
+            if(lenReadyQueue>2)
+            {
+                int wtSum = 0;
+                for (int i = 1; i < lenReadyQueue - 1 ; ++i) {
+                    wtSum = wtSum + readyQueue[i].burst;
+                }
+                printf("\nSuma %d",wtSum);
+                readyQueue[lenReadyQueue-1].wt = (exeProcess.burst - burstSeconds) + wtSum;
+            }
+            else
+            {
+                readyQueue[lenReadyQueue-1].wt = exeProcess.burst - burstSeconds;
+            }
 
 
             char PID[1024];
