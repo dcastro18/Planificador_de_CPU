@@ -32,6 +32,7 @@ int leisureTime= 0;
 
 int working = 0;
 
+int isFinished = 0 ;
 int server_sockfd, client_sockfd; // descriptores de sockets
 int server_len, client_len; //tamaÃ±os de las estructuras
 struct sockaddr_in server_address; //declaracion de estructuras
@@ -46,17 +47,23 @@ int ciclo = 1; //variable para ciclo de lectura escritura
 int puerto; //variable para el puerto
 
 
+
 // crear 2 hilos distintos (Job y cpu scheduler)
 
 void *startTimer () {
 
     while(1)
     {
-        if(!working)
-        {
-            leisureTime++;
+        if(!isFinished){
+            if(!working)
+            {
+                leisureTime++;
+            }
+            sleep(1);
         }
-        sleep(1);
+        else{
+            break;
+        }
 
     }
 }
@@ -66,30 +73,39 @@ void *startActionThread () {
     char msg[1];
     while(1)
     {
-        scanf( "%s", msg );
-        if(msg[0] == 'c')
-        {
-            fflush(stdout);
-            printf("________________________________________________________\n");
-            printReadyQueue(readyQueue);
-            printf("________________________________________________________\n");
+        if(!isFinished){
+            scanf( "%s", msg );
+            if(msg[0] == 'c')
+            {
+                fflush(stdout);
+                printf("________________________________________________________\n");
+                printReadyQueue(readyQueue);
+                printf("________________________________________________________\n");
 
+            }
+            else if(msg[0] == 'd')
+            {
+                isFinished = 1;
+                pthread_cancel(jobscheduler);
+                pthread_cancel(cpuscheduler);
+                pthread_cancel(timer);
+
+                close(client_sockfd);//*
+                close(server_sockfd); //*
+
+                fflush(stdout);
+                printf("\n --- Resumen de ejecución --- \n");
+                int n =  getQueueSize(processHistory);
+                printf("Cantidad de procesos ejecutados : %d\n",n);
+                printf("Cantidad de segundos con CPU ocioso: %d\n",leisureTime);
+                printQueue(processHistory);
+                printf("\nPromedio de Waiting Time: %f\n", getPromedioWT(processHistory));
+                printf("Promedio de Turn Around Time: %f\n", getPromedioTAT(processHistory));
+                //break;
+            }
         }
-        else if(msg[0] == 'd')
-        {
-            pthread_cancel(jobscheduler);
-            pthread_cancel(cpuscheduler);
-            pthread_cancel(timer);
-
-            fflush(stdout);
-            printf("\n --- Resumen de ejecución --- \n");
-            int n =  getQueueSize(processHistory);
-            printf("Cantidad de procesos ejecutados : %d\n",n);
-            printf("Cantidad de segundos con CPU ocioso: %d\n",leisureTime);
-            printQueue(processHistory);
-            printf("\nPromedio de Waiting Time: %f\n", getPromedioWT(processHistory));
-            printf("Promedio de Turn Around Time: %f\n", getPromedioTAT(processHistory));
-            //break;
+        else{
+            break;
         }
 
     }
@@ -162,43 +178,48 @@ void *startCPUScheduler () {
 
     while (1)
     {
-        int lenReadyQueue = getQueueSize(readyQueue);
-        if(lenReadyQueue>0)
-        {
-            switch ( algorithmID ) {
-                case 1:
-                    fifo(readyQueue);
-                    working = 1;
-                    sleep(readyQueue[0].burst);
-                    printf("El proceso con ID: %d, ha finalzado\n\n",readyQueue[0].PID);
-                    updateQueue();
-                    working = 0;
+        if(!isFinished){
+            int lenReadyQueue = getQueueSize(readyQueue);
+            if(lenReadyQueue>0)
+            {
+                switch ( algorithmID ) {
+                    case 1:
+                        fifo(readyQueue);
+                        working = 1;
+                        sleep(readyQueue[0].burst);
+                        printf("El proceso con ID: %d, ha finalzado\n\n",readyQueue[0].PID);
+                        updateQueue();
+                        working = 0;
 
-                    break;
+                        break;
 
-                case 2:
-                    bubbleSortSJF();
-                    sjf(readyQueue);
-                    working = 1;
-                    sleep(readyQueue[0].burst);
-                    updateQueue();
-                    working = 0;
-                    break;
+                    case 2:
+                        bubbleSortSJF();
+                        sjf(readyQueue);
+                        working = 1;
+                        sleep(readyQueue[0].burst);
+                        updateQueue();
+                        working = 0;
+                        break;
 
-                case 3:
-                    bubbleSortHPF();
-                    hpf(readyQueue);
-                    working = 1;
-                    sleep(readyQueue[0].burst);
-                    updateQueue();
-                    working = 0;
-                    break;
+                    case 3:
+                        bubbleSortHPF();
+                        hpf(readyQueue);
+                        working = 1;
+                        sleep(readyQueue[0].burst);
+                        updateQueue();
+                        working = 0;
+                        break;
 
-                case 4:
+                    case 4:
 
-                    break;
+                        break;
 
+                }
             }
+        }
+        else{
+            break;
         }
     }
 
@@ -221,34 +242,39 @@ void *startJobScheduler () {
 
     while(ciclo){
 
-        //acepta la conexion con el cliente actual
-        client_sockfd = accept(server_sockfd, (struct sockaddr *)&client_address, &client_len);
-        if(inicio ==0) {
-            printf("------SESION INICIADA------\n");
-            printf("CLIENTE CONECTADO\n");
-            strcpy(ch, "SERVIDOR CONECTADO...");
-            send(client_sockfd, ch, 1024, 0);
-            inicio = 1;
+        if(!isFinished){
+            //acepta la conexion con el cliente actual
+            client_sockfd = accept(server_sockfd, (struct sockaddr *)&client_address, &client_len);
+            if(inicio ==0) {
+                printf("------SESION INICIADA------\n");
+                printf("CLIENTE CONECTADO\n");
+                strcpy(ch, "SERVIDOR CONECTADO...");
+                send(client_sockfd, ch, 1024, 0);
+                inicio = 1;
+            }
+            fflush(stdout);
+            recv(client_sockfd, cs, 1024,0);
+            processCounter++;
+
+            // Crea el PCB
+            PCB pcbTemp;
+            pcbTemp.PID = processCounter;
+            pcbTemp.burst = cs[0] - '0';
+            pcbTemp.priority = cs[2] - '0';
+
+            int lenReadyQueue = getQueueSize(readyQueue);
+
+            readyQueue[lenReadyQueue] = pcbTemp;
+
+            char PID[1024];
+            sprintf(PID,"%d",processCounter);
+            send(client_sockfd, PID, 1024,0);
+
+            close(client_sockfd);
         }
-        fflush(stdout);
-        recv(client_sockfd, cs, 1024,0);
-        processCounter++;
-
-        // Crea el PCB
-        PCB pcbTemp;
-        pcbTemp.PID = processCounter;
-        pcbTemp.burst = cs[0] - '0';
-        pcbTemp.priority = cs[2] - '0';
-
-        int lenReadyQueue = getQueueSize(readyQueue);
-
-        readyQueue[lenReadyQueue] = pcbTemp;
-
-        char PID[1024];
-        sprintf(PID,"%d",processCounter);
-        send(client_sockfd, PID, 1024,0);
-
-        close(client_sockfd);
+        else{
+            break;
+        }
     }
 
     close(server_sockfd);
