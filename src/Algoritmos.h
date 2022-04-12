@@ -6,6 +6,7 @@ typedef struct PCB {
     int priority;
     int tat;
     int wt;
+    int estado;
 } PCB;
 
 // Auxiliar para obtener la cantidad de procesos en el Queue
@@ -163,23 +164,8 @@ void sjf(PCB queue[100]) {
     int wt[100];
     // Turn Around Time
     int tat[100];
-    // Applying bubble sort tecnique to sort according to burst time
-    for (i = 0; i < n ; i++)
-    {
-        for (j = 0 ; j < n-i-1; j++ )
-        {
-            if (queue[j].burst > queue[j+1].burst)
-            {
-                temp = queue[j];
-                queue[j] = queue[j+1];
-                queue[j+1] = temp;
-
-            }
-        }
-        
-    }
-    printf("process \t burst time \t waiting time \t turn around time\n");
-
+    
+    printf("Proceso %d con burst %d entra en ejecución \n",queue[0].PID,queue[0].burst);
     for (i = 0 ; i < n; i++)
     {
         wt[i]=0;
@@ -191,7 +177,7 @@ void sjf(PCB queue[100]) {
         tat[i]= wt[i]+queue[i].burst;
         queue[i].tat = tat[i];
         queue[i].wt = wt[i];
-        printf("%d\t\t\t %d\t\t\t %d\t\t\t %d\n", queue[i].PID, queue[i].burst, queue[i].wt, queue[i].tat);
+        
 
 
     }
@@ -220,25 +206,9 @@ void hpf(PCB queue[100]) {
     // Turn Around Time
     int tat[30];
     
-    // Bubblesort por priority
-    for (i = 0; i < n ; i++)
-    {
-        int pos=i;
-        for(j=i+1;j<n;j++)
-        {
-            if(queue[j].priority <queue[pos].priority)
-            {
-                pos=j;
-            }
-        }
-        temp=queue[i];
-        queue[i]=queue[pos];
-        queue[pos]=temp;
-
-    }
     wt[0]=0;
-    printf("process \t burst time\t priority \t waiting time \t turn around time\n");
-
+    
+    printf("Proceso %d con burst %d entra en ejecución \n",queue[0].PID,queue[0].burst);
     for (i=0 ; i < n; i++)
     {
         wt[i]=0;
@@ -251,7 +221,7 @@ void hpf(PCB queue[100]) {
         // Iguala wt y tat en el PCB
         queue[i].wt = wt[i];
         queue[i].tat = tat[i];
-        printf("%d\t\t\t %d\t\t\t %d\t\t\t %d\t\t\t %d\n", queue[i].PID, queue[i].burst, queue[i].priority,wt[i], tat[i]);
+        
     }
 
 }
@@ -276,7 +246,7 @@ void fifo(PCB queue[100]) {
 
     printf("Proceso %d con burst %d entra en ejecución \n",queue[0].PID,queue[0].burst);
 
-   // printf("process\t\t burst time\t waiting time\t turn around time\n");
+   
     for( i = 0 ; i < n ; i++)
     {
         wt[i] = 0;
@@ -291,7 +261,7 @@ void fifo(PCB queue[100]) {
         // Iguala wt y tat en el PCB
         queue[i].wt = wt[i];
         queue[i].tat = tat[i];
-       // printf("%d\t\t\t%d\t\t\t%d\t\t\t%d\n",queue[i].PID,queue[i].burst,queue[i].wt,queue[i].tat);
+
     }
 
 }

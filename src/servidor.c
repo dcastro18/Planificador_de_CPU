@@ -183,7 +183,7 @@ void bubbleSortHPF() {
         int pos=i;
         for(j=i+1;j<n;j++)
         {
-            if(readyQueue[j].priority <readyQueue[pos].priority)
+            if(readyQueue[j].priority <= readyQueue[pos].priority)
             {
                 pos=j;
             }
@@ -192,6 +192,7 @@ void bubbleSortHPF() {
         readyQueue[i]=readyQueue[pos];
         readyQueue[pos]=temp;
     }
+
 }
 
 int updateQueue()
@@ -217,6 +218,7 @@ void *startCPUScheduler () {
                         fifo(readyQueue);
                         exeProcess = readyQueue[0];
                         printf("El proceso con ID: %d, ha finalzado\n\n",readyQueue[0].PID);
+
                         updateQueue();
 
                         break;
@@ -226,6 +228,7 @@ void *startCPUScheduler () {
                         sjf(readyQueue);
                         working = 1;
                         sleep(readyQueue[0].burst);
+                        printf("El proceso con ID: %d, ha finalzado\n\n",readyQueue[0].PID);
                         updateQueue();
                         working = 0;
                         break;
@@ -235,6 +238,7 @@ void *startCPUScheduler () {
                         hpf(readyQueue);
                         working = 1;
                         sleep(readyQueue[0].burst);
+                        printf("El proceso con ID: %d, ha finalzado\n\n",readyQueue[0].PID);
                         updateQueue();
                         working = 0;
                         break;
@@ -289,8 +293,8 @@ void *startJobScheduler () {
             pcbTemp.PID = processCounter;
             pcbTemp.burst = cs[0] - '0';
             pcbTemp.priority = cs[2] - '0';
+            pcbTemp.estado = 0;
             pcbTemp.wt =  exeProcess.burst - burstSeconds;
-
             int lenReadyQueue = getQueueSize(readyQueue);
 
             readyQueue[lenReadyQueue] = pcbTemp;
