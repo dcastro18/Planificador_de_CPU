@@ -26,12 +26,17 @@ pthread_t cpuscheduler;
 pthread_t action;
 pthread_t timer;
 
+
+pthread_mutex_t mutex;
+
 int algorithmID = 0;
 int qt = 0;
 int leisureTime= 0;
+PCB exeProcess;
+int burstSeconds = 0;
 
-int working = 0;
 
+int isFinished = 0 ;
 int server_sockfd, client_sockfd; // descriptores de sockets
 int server_len, client_len; //tamaÃ±os de las estructuras
 struct sockaddr_in server_address; //declaracion de estructuras
@@ -46,17 +51,35 @@ int ciclo = 1; //variable para ciclo de lectura escritura
 int puerto; //variable para el puerto
 
 
-// crear 2 hilos distintos (Job y cpu scheduler)
-
 void *startTimer () {
 
     while(1)
     {
-        if(!working)
-        {
-            leisureTime++;
+        if(!isFinished){
+            if(exeProcess.PID != 0)
+            {
+
+                if(burstSeconds<exeProcess.burst)
+                {
+                    burstSeconds++;
+                    fflush(stdout);
+                    printf("\n En el timer %d", burstSeconds);
+                }
+                else{
+                    exeProcess.PID = 0;
+                    burstSeconds = 0;
+                }
+            }
+            else
+            {
+                leisureTime++;
+            }
+
+            sleep(1);
         }
-        sleep(1);
+        else{
+            break;
+        }
 
     }
 }
@@ -66,30 +89,39 @@ void *startActionThread () {
     char msg[1];
     while(1)
     {
-        scanf( "%s", msg );
-        if(msg[0] == 'c')
-        {
-            fflush(stdout);
-            printf("________________________________________________________\n");
-            printReadyQueue(readyQueue);
-            printf("________________________________________________________\n");
+        if(!isFinished){
+            scanf( "%s", msg );
+            if(msg[0] == 'c')
+            {
+                fflush(stdout);
+                printf("________________________________________________________\n");
+                printReadyQueue(readyQueue);
+                printf("________________________________________________________\n");
 
+            }
+            else if(msg[0] == 'd')
+            {
+                isFinished = 1;
+                pthread_cancel(jobscheduler);
+                pthread_cancel(cpuscheduler);
+                pthread_cancel(timer);
+
+                close(client_sockfd);//*
+                close(server_sockfd); //*
+
+                fflush(stdout);
+                printf("\n --- Resumen de ejecución --- \n");
+                int n =  getQueueSize(processHistory);
+                printf("Cantidad de procesos ejecutados : %d\n",n);
+                printf("Cantidad de segundos con CPU ocioso: %d\n",leisureTime);
+                printQueue(processHistory);
+                printf("\nPromedio de Waiting Time: %f\n", getPromedioWT(processHistory));
+                printf("Promedio de Turn Around Time: %f\n", getPromedioTAT(processHistory));
+                //break;
+            }
         }
-        else if(msg[0] == 'd')
-        {
-            pthread_cancel(jobscheduler);
-            pthread_cancel(cpuscheduler);
-            pthread_cancel(timer);
-
-            fflush(stdout);
-            printf("\n --- Resumen de ejecución --- \n");
-            int n =  getQueueSize(processHistory);
-            printf("Cantidad de procesos ejecutados : %d\n",n);
-            printf("Cantidad de segundos con CPU ocioso: %d\n",leisureTime);
-            printQueue(processHistory);
-            printf("\nPromedio de Waiting Time: %f\n", getPromedioWT(processHistory));
-            printf("Promedio de Turn Around Time: %f\n", getPromedioTAT(processHistory));
-            //break;
+        else{
+            break;
         }
 
     }
@@ -122,7 +154,6 @@ void bubbleSortSJF() {
 
     }
 
-
 }
 
 void bubbleSortHPF() {
@@ -138,7 +169,7 @@ void bubbleSortHPF() {
         int pos=i;
         for(j=i+1;j<n;j++)
         {
-            if(readyQueue[j].priority <readyQueue[pos].priority)
+            if(readyQueue[j].priority <= readyQueue[pos].priority)
             {
                 pos=j;
             }
@@ -147,6 +178,7 @@ void bubbleSortHPF() {
         readyQueue[i]=readyQueue[pos];
         readyQueue[pos]=temp;
     }
+
 }
 
 int updateQueue()
@@ -159,59 +191,74 @@ int updateQueue()
     }
 }
 
+int working;
+
 void *startCPUScheduler () {
-    
+
     while (1)
-    {   
-        
-        int lenReadyQueue = getQueueSize(readyQueue);
-        if(lenReadyQueue>0)
-        {
-            switch ( algorithmID ) {
-                case 1:
-                    fifo(readyQueue);
-                    working = 1;
-                    sleep(readyQueue[0].burst);
-                    printf("El proceso con ID: %d, ha finalzado\n\n",readyQueue[0].PID);
-                    updateQueue();
-                    working = 0;
+    {
+        if(!isFinished){
+            int lenReadyQueue = getQueueSize(readyQueue);
+            int restante;
+            if(lenReadyQueue>0)
+            {
+                switch ( algorithmID ) {
+                    case 1:
+                        fifo(readyQueue);
+                        working = 1;
+                        exeProcess = readyQueue[0];
+                        sleep(readyQueue[0].burst);
+                        printf("El proceso con ID: %d, ha finalzado\n\n",readyQueue[0].PID);
+                        working = 0;
+                        updateQueue();
 
-                    break;
+                        break;
 
-                case 2:
-                    bubbleSortSJF();
-                    sjf(readyQueue);
-                    working = 1;
-                    sleep(readyQueue[0].burst);
-                    printf("El proceso con ID: %d, ha finalzado\n\n",readyQueue[0].PID);
-                    updateQueue();
-                    working = 0;
-                    break;
+                    case 2:
+                        bubbleSortSJF();
+                        sjf(readyQueue);
+                        working = 1;
+                        sleep(readyQueue[0].burst);
+                        printf("El proceso con ID: %d, ha finalzado\n\n",readyQueue[0].PID);
+                        updateQueue();
+                        working = 0;
+                        break;
 
-                case 3:
-                    bubbleSortHPF();
-                    hpf(readyQueue);
-                    
-                    //printQueue(readyQueue);
-                    working = 1;
-                    sleep(readyQueue[0].burst);
-                    printf("El proceso con ID: %d, ha finalzado\n\n",readyQueue[0].PID);
-                    updateQueue();
-                    working = 0;
-                    break;
+                    case 3:
+                        bubbleSortHPF();
+                        hpf(readyQueue);
+                        working = 1;
+                        sleep(readyQueue[0].burst);
+                        printf("El proceso con ID: %d, ha finalzado\n\n",readyQueue[0].PID);
+                        updateQueue();
+                        working = 0;
+                        break;
 
-                case 4:
-                    
-                    roundRobin(qt,readyQueue);
-                    //printQueue(readyQueue);
-                    working = 1;
-                    sleep(readyQueue[0].burst);
-                    printf("El proceso con ID: %d, ha finalzado\n\n",readyQueue[0].PID);
-                    updateQueue();
-                    working = 0;
-                    break;
+                    case 4:
+                        restante = 0;
+                        exeProcess = readyQueue[0];
+                        if(exeProcess.burst > qt)
+                        {
+                            restante = exeProcess.burst - qt;
+                            roundRobin(qt,restante,&readyQueue);
+                            sleep(qt);
 
+                        }else
+                        {
+                            PCB prueba = roundRobin(qt,restante,&readyQueue);
+                            sleep(exeProcess.burst);
+                            //readyQueue[lenReadyQueue] = prueba;
+                            printf("El proceso con ID: %d, ha finalzado\n\n",readyQueue[0].PID);
+                        }
+
+                        updateQueue();
+                        break;
+
+                }
             }
+        }
+        else{
+            break;
         }
     }
 
@@ -234,34 +281,78 @@ void *startJobScheduler () {
 
     while(ciclo){
 
-        //acepta la conexion con el cliente actual
-        client_sockfd = accept(server_sockfd, (struct sockaddr *)&client_address, &client_len);
-        if(inicio ==0) {
-            printf("------SESION INICIADA------\n");
-            printf("CLIENTE CONECTADO\n");
-            strcpy(ch, "SERVIDOR CONECTADO...");
-            send(client_sockfd, ch, 1024, 0);
-            inicio = 1;
+        if(!isFinished){
+            //acepta la conexion con el cliente actual
+            client_sockfd = accept(server_sockfd, (struct sockaddr *)&client_address, &client_len);
+            if(inicio ==0) {
+                printf("------SESION INICIADA------\n");
+                printf("CLIENTE CONECTADO\n");
+                strcpy(ch, "SERVIDOR CONECTADO...");
+                send(client_sockfd, ch, 1024, 0);
+                inicio = 1;
+            }
+            fflush(stdout);
+            recv(client_sockfd, cs, 1024,0);
+            processCounter++;
+
+            char burst[10];
+
+            for (int i = 0; i < strlen(cs)-1 ; ++i) {
+                if(cs[i]!=';')
+                {
+                    burst[i] = cs[i];
+                }
+                else{
+                    burst[i] = '\0';
+                    break;
+                }
+
+            }
+            char priority = cs[strlen(cs)-2];
+
+            // Crea el PCB
+            PCB pcbTemp;
+            pcbTemp.PID = processCounter;
+            pcbTemp.burst = atoi(burst);
+            pcbTemp.priority = priority - '0';
+            pcbTemp.estado = 1;
+
+            printf("\nDentro de la creacion %d",burstSeconds);
+
+            int lenReadyQueue = getQueueSize(readyQueue);
+
+            pthread_mutex_lock(&mutex);
+
+            readyQueue[lenReadyQueue] = pcbTemp;
+
+            lenReadyQueue++;
+
+
+            if(lenReadyQueue>2)
+            {
+                int wtSum = 0;
+                for (int i = 1; i < lenReadyQueue - 1 ; ++i) {
+                    wtSum = wtSum + readyQueue[i].burst;
+                }
+                printf("\nSuma %d",wtSum);
+                readyQueue[lenReadyQueue-1].wt = (exeProcess.burst - burstSeconds) + wtSum;
+            }
+            else
+            {
+                readyQueue[lenReadyQueue-1].wt = exeProcess.burst - burstSeconds;
+            }
+
+            pthread_mutex_unlock(&mutex);
+
+            char PID[1024];
+            sprintf(PID,"%d",processCounter);
+            send(client_sockfd, PID, 1024,0);
+
+            close(client_sockfd);
         }
-        fflush(stdout);
-        recv(client_sockfd, cs, 1024,0);
-        processCounter++;
-
-        // Crea el PCB
-        PCB pcbTemp;
-        pcbTemp.PID = processCounter;
-        pcbTemp.burst = cs[0] - '0';
-        pcbTemp.priority = cs[2] - '0';
-
-        int lenReadyQueue = getQueueSize(readyQueue);
-
-        readyQueue[lenReadyQueue] = pcbTemp;
-
-        char PID[1024];
-        sprintf(PID,"%d",processCounter);
-        send(client_sockfd, PID, 1024,0);
-
-        close(client_sockfd);
+        else{
+            break;
+        }
     }
 
     close(server_sockfd);
@@ -285,7 +376,7 @@ int main(int argc, char const *argv[])
         printf( "\n\n Seleccione el algoritmo que desee (1-4): ");
 
         scanf( "%d", &opcion );
-        
+
         // crear el socket
 
         switch ( opcion )
@@ -296,7 +387,6 @@ int main(int argc, char const *argv[])
 
             case 2:
                 algorithmID = 2;
-                
                 break;
 
             case 3:
@@ -315,7 +405,8 @@ int main(int argc, char const *argv[])
 
     } while ( opcion < 0 || opcion > 4 );
 
-    
+    pthread_mutex_init(&mutex,NULL);
+
     pthread_create(&jobscheduler,NULL, startJobScheduler,NULL);
     pthread_create(&cpuscheduler,NULL, startCPUScheduler,NULL);
     pthread_create(&action,NULL, startActionThread,NULL);
@@ -324,7 +415,8 @@ int main(int argc, char const *argv[])
     pthread_join(cpuscheduler,NULL);
     pthread_join(action,NULL);
     pthread_join(timer,NULL);
-    
+
+
 
 
     return 0;

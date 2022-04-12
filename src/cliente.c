@@ -26,6 +26,9 @@ int bufs;
 int ciclo =1;
 char ipserver[16] = "127.0.0.1";
 int puerto = 5000;
+int bandera = 0; //*
+
+pthread_t mainThread;
 
 
 
@@ -50,8 +53,11 @@ void *sendData (void *args) {
     //conectar con el server
     result = connect(sockfd, (struct sockaddr *)&address, len);
     if(result ==-1){
-        perror("ERROR EN LA CONEXION\n");
+        bandera = 1; //*
+        printf("Proceso Terminado\n");
+        pthread_cancel(mainThread);
         close(sockfd);
+        return;
     }
 
     //validar el inicio de sesion
@@ -87,21 +93,26 @@ void *automatic (void *args)
     
     while(1)
     {
+        if(bandera==0){ //*
         sleep(2);
-        int randBurst = randNumber(r1->min,r1->max);
-        int randPriority = randNumber(1,5);
+            int randBurst = randNumber(r1->min,r1->max);
+            int randPriority = randNumber(1,5);
 
-        con[0] = randBurst + '0';
-        con[1] = ';';
-        con[2] = randPriority + '0';
+            con[0] = randBurst + '0';
+            con[1] = ';';
+            con[2] = randPriority + '0';
 
-        printf("Palabra:  %s",con);
+           // printf("Palabra:  %s",con);
 
-        pthread_create(&pthread,NULL, sendData, (void *)&con);
-        pthread_join(pthread,NULL);
+            pthread_create(&pthread,NULL, sendData, (void *)&con);
+            pthread_join(pthread,NULL);
 
-        int randNum = randNumber(3,8);
-        sleep(randNum);
+            int randNum = randNumber(3,8);
+            sleep(randNum);
+        }
+        else{
+            break;
+        }
     }
 
 }
@@ -145,9 +156,6 @@ void *readFile (void *args) {
 
 int main(int argc, char const *argv[])
 {
-
-    pthread_t mainThread;
-
 
     int min, max, opcion;
 

@@ -12,7 +12,8 @@ typedef struct PCB {
     int priority;
     int tat;
     int wt;
-    int exitTime;
+    int estado;
+
 } PCB;
 
 
@@ -103,9 +104,11 @@ void printReadyQueue(PCB queue[100]) {
     qt: Quantum Time
     bt[]: Burst Time of Processes
 */
-void roundRobin(int qt, PCB queue[100]) {
+PCB roundRobin(int qt,int restante, PCB queue[100]) {
+
+
     // Cantidad de procesos
-    int n =  getQueueSize(queue);
+
     int i;
     int temp;
 
@@ -120,77 +123,36 @@ void roundRobin(int qt, PCB queue[100]) {
     // Burst Time CopyQueue
     PCB rem_bt[100];
     int sq = 0;
-     printf("Proceso %d con burst %d entra en ejecución \n",queue[0].PID,queue[0].burst);
-    // Number of proccesses for and burst copying
-    for (i = 0; i < n ; i++){
-        rem_bt[i] = queue[i];
-    }
-
-    while (1) {
-
-        for (i = 0, count = 0 ; i < n ; i++){
-            
-            if (queue[i].burst == 0){
-                count++;
-                continue;
-            }
-            if (queue[i].burst > qt){
-                queue[i].burst = queue[i].burst - qt;
-                // Enviar de ultimo
-            }
-            else {
-                if (queue[i].burst >=0) {
-                    temp = queue[i].burst;
-                    queue[i].burst = 0;
-                }
-                sq = sq + temp;
-                queue[i].tat = sq;
-            }
-            
-        }
-        if (n == count) 
-            break;
-    }
-
-    for ( i = 0; i < n ; i++){
-        queue[i].burst = rem_bt[i].burst;
-        queue[i].wt = queue[i].tat - queue[i].burst;
-        
-    }
 
 
-    /*
-    
+    int wtSum = 0;
+    int falta = 0;
 
-    while (1) {
-        for (i = 0, count = 0; i < n ; i++) 
+    int cont = 0;
+
+    printf("Proceso %d con burst %d entra en ejecución \n",queue[0].PID,queue[0].burst);
+
+    int n =  getQueueSize(queue);
+
+    if(n>0)
+    {
+        printf("\nRestante %d",restante);
+        if(restante>0)
         {
-            temp = qt;
-            if (rem_bt[i] == 0)
-            {
-                count++;
-                continue;
-            }
-            if (rem_bt[i] > qt)
-                rem_bt[i] = rem_bt[i] - qt;
-            else 
-                if (rem_bt[i] >= 0)
-                {
-                    temp = rem_bt[i];
-                    rem_bt[i] = 0;
-                }
-                sq = sq + temp;
-                tat[i] = sq;
+            PCB temp = queue[0];
 
+
+            temp.burst = restante;
+            for (int j = 1; j < n-1 ; j++) {
+                wtSum = wtSum + queue[j].burst;
+            }
+            temp.wt = queue[n].wt + wtSum;
+
+            return temp;
         }
-        if (n == count) 
-            break;
     }
 
-    
-    
-    */
-    
+
 
 }
 
@@ -213,14 +175,22 @@ void sjf(PCB queue[100]) {
     int tat[100];
     
 
+    printf("Proceso %d con burst %d entra en ejecución \n",queue[0].PID,queue[0].burst);
     for (i = 0 ; i < n; i++)
     {
-        queue[i].wt =0;
-        queue[i].tat=0;
+        //wt[i]=0;
+        tat[i]=0;
+
         for (j=0;j<i;j++)
         {
             queue[i].wt = queue[i].wt + queue[j].burst;
         }
+
+        tat[i]= queue[i].wt+queue[i].burst;
+        queue[i].tat = tat[i];
+        //queue[i].wt = wt[i];
+        
+
 
         queue[i].tat = wt[i] + queue[i].burst;   
 
@@ -249,24 +219,24 @@ void hpf(PCB queue[100]) {
     int tat[30];
     
 
-
-    wt[0]=0;
-
+    //wt[0]=0;
+    
+    printf("Proceso %d con burst %d entra en ejecución \n",queue[0].PID,queue[0].burst);
 
     for (i=0 ; i < n; i++)
     {
-        wt[i]=0;
+        //wt[i]=0;
         tat[i]=0;
         for (j=0;j<i;j++)
         {
             wt[i]=wt[i]+queue[j].burst;
         }
-        tat[i]=wt[i]+queue[i].burst;
+        tat[i]=queue[i].wt+queue[i].burst;
         // Iguala wt y tat en el PCB
-        queue[i].wt = wt[i];
+        //queue[i].wt = wt[i];
         queue[i].tat = tat[i];
 
-
+        
     }
 
 }
@@ -294,7 +264,7 @@ void fifo(PCB queue[100]) {
    
     for( i = 0 ; i < n ; i++)
     {
-        wt[i] = 0;
+        //wt[i] = 0;
 
         tat[i] = 0;
 
@@ -302,14 +272,18 @@ void fifo(PCB queue[100]) {
         {
             wt[i] = wt[i]+queue[j].burst;
         }
-        tat[i] = wt[i]+queue[i].burst;
+        tat[i] = queue[i].wt+queue[i].burst;
         // Iguala wt y tat en el PCB
 
-        queue[i].wt = wt[i];
+        //queue[i].wt = wt[i];
         queue[i].tat = tat[i];
-
-       
 
     }
 
 }
+
+
+
+       
+
+
