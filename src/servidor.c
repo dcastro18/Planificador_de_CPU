@@ -225,6 +225,7 @@ void *startCPUScheduler () {
         if(!isFinished){
             int lenReadyQueue = getQueueSize(readyQueue);
             int restante;
+            int realWT;
 
             if(lenReadyQueue>0)
             {
@@ -236,7 +237,11 @@ void *startCPUScheduler () {
                         exeProcess = readyQueue[0];
                         sleep(readyQueue[0].burst);
                         readyQueue[0].tat = tiempoTotal;
-                        readyQueue[0].wt = (readyQueue[0].tat-readyQueue[0].burst)-readyQueue[0].llegada;
+                        realWT = (readyQueue[0].tat-readyQueue[0].burst)-readyQueue[0].llegada;
+                        if (realWT < 0){
+                            realWT = 0;
+                        }
+                        readyQueue[0].wt = realWT;
                         printf("El proceso con ID: %d, ha finalizado\n",readyQueue[0].PID);
                         updateQueue();
 
@@ -249,7 +254,12 @@ void *startCPUScheduler () {
                         exeProcess = readyQueue[0];
                         sleep(readyQueue[0].burst);
                         readyQueue[0].tat = tiempoTotal;
-                        readyQueue[0].wt = (readyQueue[0].tat-readyQueue[0].burst)-readyQueue[0].llegada;
+                        realWT = (readyQueue[0].tat-readyQueue[0].burst)-readyQueue[0].llegada;
+                        if (realWT < 0){
+                            realWT = 0;
+                        }
+                        readyQueue[0].wt = realWT;
+
                         printf("El proceso con ID: %d, ha finalzado\n",readyQueue[0].PID);
                         updateQueue();
                         break;
@@ -261,7 +271,11 @@ void *startCPUScheduler () {
                         exeProcess = readyQueue[0];
                         sleep(readyQueue[0].burst);
                         readyQueue[0].tat = tiempoTotal;
-                        readyQueue[0].wt = (readyQueue[0].tat-readyQueue[0].burst)-readyQueue[0].llegada;
+                        realWT = (readyQueue[0].tat-readyQueue[0].burst)-readyQueue[0].llegada;
+                        if (realWT < 0){
+                            realWT = 0;
+                        }
+                        readyQueue[0].wt = realWT;
                         printf("El proceso con ID: %d, ha finalzado\n",readyQueue[0].PID);
                         updateQueue();
                         break;
@@ -356,7 +370,7 @@ void *startJobScheduler () {
             pcbTemp.priority = priority - '0';
             pcbTemp.llegada = tiempoTotal;
 
-            printf(" Llego el proceso:  %d\n",processCounter);
+            printf(" Llego el proceso:  %d",processCounter);
 
             int lenReadyQueue = getQueueSize(readyQueue);
 
