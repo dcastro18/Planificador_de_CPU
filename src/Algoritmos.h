@@ -6,7 +6,8 @@ typedef struct PCB {
     int priority;
     int tat;
     int wt;
-    int estado;
+    int llegada;
+    int salida;
 } PCB;
 
 // Auxiliar para obtener la cantidad de procesos en el Queue
@@ -89,7 +90,7 @@ void printReadyQueue(PCB queue[100]) {
     qt: Quantum Time
     bt[]: Burst Time of Processes
 */
-PCB roundRobin(int qt,int restante, PCB queue[100]) {
+int roundRobin(int qt, PCB queue[100]) {
 
 
     // Cantidad de procesos
@@ -112,27 +113,17 @@ PCB roundRobin(int qt,int restante, PCB queue[100]) {
 
     int cont = 0;
 
-    printf("Proceso %d con burst %d entra en ejecución \n",queue[0].PID,queue[0].burst);
+    printf("\nProceso %d con burst %d entra en ejecución \n",queue[0].PID,queue[0].burst);
 
     int n =  getQueueSize(queue);
 
-    if(n>0)
-    {
-        printf("\nRestante %d",restante);
-        if(restante>0)
-        {
-            PCB temp = queue[0];
 
-
-            temp.burst = restante;
-            for (int j = 1; j < n-1 ; j++) {
-                wtSum = wtSum + queue[j].burst;
-            }
-            temp.wt = queue[n].wt + wtSum;
-
-            return temp;
-        }
+    for (int j = 1; j < n ; j++) {
+        wtSum = wtSum + queue[j].burst;
     }
+    queue[0].wt = queue[n].wt + wtSum;
+
+
 
 
     //}

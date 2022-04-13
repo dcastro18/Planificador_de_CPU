@@ -102,7 +102,7 @@ void *automatic (void *args)
             con[1] = ';';
             con[2] = randPriority + '0';
 
-           // printf("Palabra:  %s",con);
+            //printf("\nPalabra:  %s",con);
 
             pthread_create(&pthread,NULL, sendData, (void *)&con);
             pthread_join(pthread,NULL);
