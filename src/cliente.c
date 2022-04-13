@@ -26,7 +26,7 @@ int bufs;
 int ciclo =1;
 char ipserver[16] = "127.0.0.1";
 int puerto = 5000;
-int bandera = 0; //*
+int bandera = 0; 
 
 pthread_t mainThread;
 

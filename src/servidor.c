@@ -169,7 +169,7 @@ void bubbleSortHPF() {
         int pos=i;
         for(j=i+1;j<n;j++)
         {
-            if(readyQueue[j].priority <= readyQueue[pos].priority)
+            if(readyQueue[j].priority < readyQueue[pos].priority)
             {
                 pos=j;
             }
@@ -218,6 +218,7 @@ void *startCPUScheduler () {
                         bubbleSortSJF();
                         sjf(readyQueue);
                         working = 1;
+                        exeProcess = readyQueue[0];
                         sleep(readyQueue[0].burst);
                         printf("El proceso con ID: %d, ha finalzado\n\n",readyQueue[0].PID);
                         updateQueue();
@@ -228,6 +229,7 @@ void *startCPUScheduler () {
                         bubbleSortHPF();
                         hpf(readyQueue);
                         working = 1;
+                        exeProcess = readyQueue[0];
                         sleep(readyQueue[0].burst);
                         printf("El proceso con ID: %d, ha finalzado\n\n",readyQueue[0].PID);
                         updateQueue();
@@ -317,7 +319,7 @@ void *startJobScheduler () {
             pcbTemp.priority = priority - '0';
             pcbTemp.estado = 1;
 
-            printf("\nDentro de la creacion %d",burstSeconds);
+            //printf("\nDentro de la creacion %d\n",burstSeconds);
 
             int lenReadyQueue = getQueueSize(readyQueue);
 
