@@ -188,8 +188,7 @@ void sjf(PCB queue[100]) {
     int wt[100];
     // Turn Around Time
     int tat[100];
-    
-    printf("Proceso %d con burst %d entra en ejecución \n",queue[0].PID,queue[0].burst);
+
     for (i = 0 ; i < n; i++)
     {
         //wt[i]=0;
@@ -201,12 +200,8 @@ void sjf(PCB queue[100]) {
         tat[i]= queue[i].wt+queue[i].burst;
         queue[i].tat = tat[i];
         //queue[i].wt = wt[i];
-        
-
 
     }
-    
-    
 
 }
 
@@ -229,10 +224,7 @@ void hpf(PCB queue[100]) {
     int wt[30];
     // Turn Around Time
     int tat[30];
-    
-    //wt[0]=0;
-    
-    printf("Proceso %d con burst %d entra en ejecución \n",queue[0].PID,queue[0].burst);
+
     for (i=0 ; i < n; i++)
     {
         //wt[i]=0;
@@ -268,9 +260,6 @@ void fifo(PCB queue[100]) {
     // Turn Around Time
     int tat[100];
 
-    printf("Proceso %d con burst %d entra en ejecución \n",queue[0].PID,queue[0].burst);
-
-   
     for( i = 0 ; i < n ; i++)
     {
         //wt[i] = 0;

@@ -19,17 +19,14 @@ struct sockaddr_in address;
 int result;
 char ch[1024];
 char c[1024];
-int buf;
 int inicio = 0;
 char cs[1024];
-int bufs;
 int ciclo =1;
 char ipserver[16] = "127.0.0.1";
 int puerto = 5000;
 int bandera = 0; //*
 
 pthread_t mainThread;
-
 
 
 int randNumber(int min, int max) {
@@ -72,17 +69,12 @@ void *sendData (void *args) {
     recv(sockfd, c, 1024,0);
     printf("Proceso recibido! El PID asignado es el número: %s\n",c);
     close(sockfd);
-    // matar el thread
 }
 
 typedef struct Rango {
     int min;
     int max;
 } Rango;
-
-char numToASCII(int num) {
-    return (char)num;
-}
 
 void *automatic (void *args)
 {
@@ -93,8 +85,8 @@ void *automatic (void *args)
     
     while(1)
     {
-        if(bandera==0){ //*
-        sleep(2);
+        if(bandera==0){
+            sleep(2);
             int randBurst = randNumber(r1->min,r1->max);
             int randPriority = randNumber(1,5);
 
@@ -169,8 +161,6 @@ int main(int argc, char const *argv[])
 
         scanf( "%d", &opcion );
 
-        /* Inicio del anidamiento */
-
 
         switch ( opcion )
         {
@@ -195,8 +185,6 @@ int main(int argc, char const *argv[])
             case 3:
                 break;
         }
-
-        /* Fin del anidamiento */
 
     } while ( opcion < 0 || opcion > 3 );
 
